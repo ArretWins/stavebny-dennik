@@ -1,0 +1,9 @@
+{
+  "name": "Stavebný denník – pracovník",
+  "short_name": "Stavba",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f5ef",
+  "theme_color": "#1b5e20",
+  "lang": "sk"
+}

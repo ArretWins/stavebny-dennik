@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="sk">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#1b5e20" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/styles.css" />
+    <title>Materiál na stavbu</title>
+  </head>
+  <body>
+    <header>
+      <p class="eyebrow">Stavebný denník</p>
+      <h1>Materiál na stavbu</h1>
+    </header>
+    <main>
+      <div id="message" aria-live="polite"></div>
+      <section id="loading" class="card">
+        <h2>Načítavam prístup…</h2>
+        <p class="muted">Prístup zostane bezpečne uložený v tomto zariadení.</p>
+      </section>
+      <section id="join" class="card hidden">
+        <span class="site-mark">VSTUP NA OBJEKT</span>
+        <h2>Pripojenie k objektu</h2>
+        <p class="muted">
+          Zadajte údaje iba raz. Majster potom potvrdí váš prístup.
+        </p>
+        <form id="join-form">
+          <label for="first">Meno</label
+          ><input
+            id="first"
+            maxlength="80"
+            autocomplete="given-name"
+            required
+          /><label for="last">Priezvisko</label
+          ><input
+            id="last"
+            maxlength="80"
+            autocomplete="family-name"
+            required
+          /><label for="position">Pracovná pozícia</label
+          ><input
+            id="position"
+            maxlength="100"
+            placeholder="Napr. murár"
+            required
+          /><button>Odoslať na schválenie</button>
+        </form>
+      </section>
+      <section id="pending" class="card hidden">
+        <span class="status status-waiting">Čaká na schválenie</span>
+        <h2 id="pending-name"></h2>
+        <p>
+          Majster musí potvrdiť váš prístup. Túto stránku môžete neskôr znovu
+          otvoriť.
+        </p>
+        <button class="secondary" id="refresh">Skontrolovať stav</button>
+      </section>
+      <section id="blocked" class="card hidden">
+        <h2>Prístup nie je aktívny</h2>
+        <p id="blocked-text"></p>
+      </section>
+      <section id="active" class="hidden">
+        <div class="card worker-card">
+          <span class="status">Prístup aktívny</span>
+          <h2 id="worker-name"></h2>
+          <p class="muted" id="project-name"></p>
+          <button type="button" class="secondary hidden" id="enable-push">
+            Povoliť upozornenia
+          </button>
+          <p class="muted hidden" id="push-enabled">Upozornenia sú povolené.</p>
+        </div>
+        <div class="card request-card">
+          <h2>Nová žiadosť o materiál</h2>
+          <form id="request-form">
+            <div id="items"></div>
+            <button type="button" class="secondary" id="add-item">
+              Pridať položku</button
+            ><label for="desired">Požadovaný dátum</label
+            ><input id="desired" type="date" /><label for="comment"
+              >Poznámka</label
+            ><textarea id="comment" maxlength="500" rows="3"></textarea
+            ><button>Odoslať žiadosť</button>
+          </form>
+        </div>
+        <h2>Moje žiadosti</h2>
+        <div id="requests"></div>
+        <div class="card privacy-card">
+          <label class="privacy" for="analytics-toggle"
+            ><span
+              ><strong>Anonymná analytika</strong
+              ><small
+                >Pomáha zlepšovať pilotnú verziu. Neukladá meno ani obsah
+                žiadostí.</small
+              ></span
+            ><input id="analytics-toggle" type="checkbox" checked
+          /></label>
+        </div>
+      </section>
+    </main>
+    <script src="/config.js"></script>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,89 @@
+import { readFile } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { createClient } from "@supabase/supabase-js";
+
+async function main() {
+  if (process.env.RESTORE_CONFIRM !== "RESTORE")
+    throw new Error(
+      "Set RESTORE_CONFIRM=RESTORE to confirm the target database may be changed",
+    );
+  const manifestPath = resolve(
+    process.env.BACKUP_MANIFEST || process.argv[2] || "",
+  );
+  if (!process.env.BACKUP_MANIFEST && !process.argv[2])
+    throw new Error("Pass the manifest path or set BACKUP_MANIFEST");
+  const dbUrl = process.env.SUPABASE_DB_URL || "";
+  const supabaseUrl =
+    process.env.SUPABASE_URL || process.env.EXPO_PUBLIC_SUPABASE_URL || "";
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+  if (!dbUrl || !supabaseUrl || !serviceKey)
+    throw new Error(
+      "SUPABASE_DB_URL, SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required",
+    );
+  const root = dirname(manifestPath);
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  if (manifest.mode !== "complete")
+    throw new Error("Dry-run backups cannot be restored");
+  const files = [
+    ...(manifest.database || []),
+    ...(manifest.buckets || []).flatMap(
+      (bucket: { files?: unknown[] }) => bucket.files || [],
+    ),
+  ] as Array<{ path: string; bytes: number; sha256: string }>;
+  for (const file of files) {
+    const localPath = resolve(root, file.path);
+    if (!localPath.startsWith(`${root}\\`) && !localPath.startsWith(`${root}/`))
+      throw new Error(`Manifest path escapes backup: ${file.path}`);
+    const bytes = await readFile(localPath);
+    const digest = createHash("sha256").update(bytes).digest("hex");
+    if (bytes.byteLength !== file.bytes || digest !== file.sha256)
+      throw new Error(`Checksum mismatch: ${file.path}`);
+  }
+  const psql =
+    process.env.PSQL_BIN ||
+    (process.platform === "win32" ? "psql.exe" : "psql");
+  for (const name of ["roles.sql", "schema.sql", "data.sql"]) {
+    const result = spawnSync(
+      psql,
+      [
+        dbUrl,
+        "--set",
+        "ON_ERROR_STOP=1",
+        "--file",
+        join(root, "database", name),
+      ],
+      { stdio: "inherit", shell: false },
+    );
+    if (result.error) throw result.error;
+    if (result.status !== 0)
+      throw new Error(`psql failed while restoring ${name}`);
+  }
+  const client = createClient(supabaseUrl, serviceKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  for (const bucket of manifest.buckets || []) {
+    for (const file of bucket.files || []) {
+      const storagePath = file.storagePath;
+      if (typeof storagePath !== "string" || !storagePath)
+        throw new Error(`Missing storage path for ${file.path}`);
+      const localPath = resolve(root, file.path);
+      if (
+        !localPath.startsWith(`${root}\\`) &&
+        !localPath.startsWith(`${root}/`)
+      )
+        throw new Error(`Manifest path escapes backup: ${file.path}`);
+      const bytes = await readFile(localPath);
+      const uploaded = await client.storage
+        .from(bucket.id)
+        .upload(storagePath, bytes, { upsert: true });
+      if (uploaded.error) throw uploaded.error;
+    }
+  }
+  console.log(`Backup restored from ${root}`);
+}
+void main().catch((error) => {
+  console.error(error instanceof Error ? error.message : error);
+  process.exitCode = 1;
+});
