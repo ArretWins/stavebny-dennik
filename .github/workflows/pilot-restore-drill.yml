@@ -1,0 +1,59 @@
+name: Pilot restore drill
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: Type RESTORE to confirm the temporary target may be erased
+        required: true
+        type: string
+
+jobs:
+  restore-drill:
+    if: ${{ inputs.confirm == 'RESTORE' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Confirm PostgreSQL client
+        run: psql --version
+      - name: Link source Supabase project
+        run: npx supabase link --project-ref "$SUPABASE_PROJECT_REF"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+      - name: Create fresh source backup
+        run: npm run backup:pilot
+        env:
+          BACKUP_USE_LINKED: "1"
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Locate and verify backup
+        id: backup
+        shell: bash
+        run: |
+          manifest="$(find backups -name manifest.json -print -quit)"
+          test -n "$manifest"
+          npm run backup:verify -- "$manifest"
+          echo "manifest=$manifest" >> "$GITHUB_OUTPUT"
+      - name: Restore into temporary Supabase project
+        run: npm run backup:restore -- "${{ steps.backup.outputs.manifest }}"
+        env:
+          RESTORE_CONFIRM: RESTORE
+          RESTORE_CLEAR_TARGET: CLEAR
+          SUPABASE_DB_URL: ${{ secrets.DRILL_SUPABASE_DB_URL }}
+          SUPABASE_URL: ${{ secrets.DRILL_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.DRILL_SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Verify restored rows, users and files
+        run: npm run backup:drill:verify -- "${{ steps.backup.outputs.manifest }}"
+        env:
+          SOURCE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SOURCE_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TARGET_SUPABASE_URL: ${{ secrets.DRILL_SUPABASE_URL }}
+          TARGET_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.DRILL_SUPABASE_SERVICE_ROLE_KEY }}

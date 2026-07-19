@@ -15,6 +15,7 @@
     "backup:pilot": "tsx scripts/backup-pilot.ts",
     "backup:verify": "tsx scripts/verify-backup.ts",
     "backup:restore": "tsx scripts/restore-pilot.ts",
+    "backup:drill:verify": "tsx scripts/verify-restore-drill.ts",
     "smoke:production": "tsx scripts/pilot-production-smoke.ts",
     "validate": "npm run typecheck && npm run lint:translations && npm run lint:copy && npm test",
     "ios": "expo run:ios"

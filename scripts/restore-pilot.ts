@@ -4,10 +4,32 @@ import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 
+function runPsql(psql: string, dbUrl: string, args: string[], operation: string) {
+  const result = spawnSync(
+    psql,
+    [dbUrl, "--set", "ON_ERROR_STOP=1", ...args],
+    { stdio: "inherit", shell: false },
+  );
+  if (result.error) throw result.error;
+  if (result.status !== 0)
+    throw new Error(`psql failed while ${operation}`);
+}
+
+function copiedTables(dataSql: string): string[] {
+  const tables = new Set<string>();
+  for (const match of dataSql.matchAll(/^COPY\s+"([^"]+)"\."([^"]+)"/gm))
+    tables.add(`"${match[1].replaceAll('"', '""')}"."${match[2].replaceAll('"', '""')}"`);
+  return [...tables];
+}
+
 async function main() {
   if (process.env.RESTORE_CONFIRM !== "RESTORE")
     throw new Error(
       "Set RESTORE_CONFIRM=RESTORE to confirm the target database may be changed",
+    );
+  if (process.env.RESTORE_CLEAR_TARGET !== "CLEAR")
+    throw new Error(
+      "Set RESTORE_CLEAR_TARGET=CLEAR to confirm existing target rows may be removed",
     );
   const manifestPath = resolve(
     process.env.BACKUP_MANIFEST || process.argv[2] || "",
@@ -44,22 +66,31 @@ async function main() {
   const psql =
     process.env.PSQL_BIN ||
     (process.platform === "win32" ? "psql.exe" : "psql");
-  for (const name of ["roles.sql", "schema.sql", "data.sql"]) {
-    const result = spawnSync(
+  for (const name of ["roles.sql", "schema.sql"])
+    runPsql(
       psql,
-      [
-        dbUrl,
-        "--set",
-        "ON_ERROR_STOP=1",
-        "--file",
-        join(root, "database", name),
-      ],
-      { stdio: "inherit", shell: false },
+      dbUrl,
+      ["--file", join(root, "database", name)],
+      `restoring ${name}`,
     );
-    if (result.error) throw result.error;
-    if (result.status !== 0)
-      throw new Error(`psql failed while restoring ${name}`);
-  }
+  const dataSql = await readFile(join(root, "database", "data.sql"), "utf8");
+  const tables = copiedTables(dataSql);
+  if (!tables.length) throw new Error("No COPY tables found in data.sql");
+  runPsql(
+    psql,
+    dbUrl,
+    [
+      "--command",
+      `TRUNCATE TABLE ${tables.join(", ")} RESTART IDENTITY CASCADE;`,
+    ],
+    "clearing target tables",
+  );
+  runPsql(
+    psql,
+    dbUrl,
+    ["--file", join(root, "database", "data.sql")],
+    "restoring data.sql",
+  );
   const client = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -81,6 +112,12 @@ async function main() {
       if (uploaded.error) throw uploaded.error;
     }
   }
+  runPsql(
+    psql,
+    dbUrl,
+    ["--command", "NOTIFY pgrst, 'reload schema'; NOTIFY pgrst, 'reload config';"],
+    "refreshing the API schema cache",
+  );
   console.log(`Backup restored from ${root}`);
 }
 void main().catch((error) => {

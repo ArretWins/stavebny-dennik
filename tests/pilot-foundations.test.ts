@@ -92,7 +92,7 @@ describe("compressed uploads and metered functions", () => {
       ocr.indexOf("p_feature_key: 'receipt_ocr'"),
     );
     expect(ocr).toContain("status: 402");
-    expect(report).toContain("p_feature_key: 'receipt_exports'");
+    expect(report).toContain('p_feature_key: "receipt_exports"');
     expect(report).toContain("track_analytics_event");
   });
 });
@@ -103,7 +103,12 @@ describe("static worker portal and recoverable backups", () => {
   const build = readFileSync("scripts/build-worker-portal.ts", "utf8");
   const backup = readFileSync("scripts/backup-pilot.ts", "utf8");
   const restore = readFileSync("scripts/restore-pilot.ts", "utf8");
+  const restoreVerify = readFileSync("scripts/verify-restore-drill.ts", "utf8");
   const workflow = readFileSync(".github/workflows/pilot-backup.yml", "utf8");
+  const restoreWorkflow = readFileSync(
+    ".github/workflows/pilot-restore-drill.yml",
+    "utf8",
+  );
 
   it("builds a safe static portal with QR join, own requests and analytics opt-out", () => {
     expect(build).toContain("WORKER_PORTAL_SUPABASE_URL");
@@ -127,8 +132,14 @@ describe("static worker portal and recoverable backups", () => {
     expect(backup).toContain('createHash("sha256")');
     expect(backup).toContain("await rename(partial, destination)");
     expect(restore).toContain('RESTORE_CONFIRM !== "RESTORE"');
+    expect(restore).toContain('RESTORE_CLEAR_TARGET !== "CLEAR"');
+    expect(restore).toContain("TRUNCATE TABLE");
     expect(restore).toContain("upsert: true");
+    expect(restoreVerify).toContain("Restored object checksum mismatch");
+    expect(restoreVerify).toContain("auth.users");
     expect(workflow).toContain("cron:");
     expect(workflow).toContain("retention-days: 14");
+    expect(restoreWorkflow).toContain("workflow_dispatch:");
+    expect(restoreWorkflow).toContain("DRILL_SUPABASE_DB_URL");
   });
 });
