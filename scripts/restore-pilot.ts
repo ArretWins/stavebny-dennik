@@ -73,13 +73,27 @@ async function main() {
   const psql =
     process.env.PSQL_BIN ||
     (process.platform === "win32" ? "psql.exe" : "psql");
-  for (const name of ["roles.sql", "schema.sql"])
-    runPsql(
-      psql,
-      dbUrl,
-      ["--file", join(root, "database", name)],
-      `restoring ${name}`,
-    );
+  runPsql(
+    psql,
+    dbUrl,
+    ["--file", join(root, "database", "roles.sql")],
+    "restoring roles.sql",
+  );
+  runPsql(
+    psql,
+    dbUrl,
+    [
+      "--command",
+      "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;",
+    ],
+    "resetting the public schema",
+  );
+  runPsql(
+    psql,
+    dbUrl,
+    ["--file", join(root, "database", "schema.sql")],
+    "restoring schema.sql",
+  );
   const dataSql = withoutStorageCopies(
     await readFile(join(root, "database", "data.sql"), "utf8"),
   );
