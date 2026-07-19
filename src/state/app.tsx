@@ -64,6 +64,7 @@ import {
 } from "@/services/workforceRepository";
 import { registerPushSubscription } from "@/services/pushNotifications";
 import { trackPilotEvent } from "@/services/pilotAccount";
+import { recordClientError, recordSyncRun } from "@/services/monitoring";
 
 type AppContextValue = {
   loading: boolean;
@@ -604,6 +605,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const client = supabase;
     if (!client) return;
     const snapshot = storeRef.current.snapshot;
+    const startedAt = Date.now();
     const resolvedWeather = new Map<
       string,
       DiaryEntry["evidence"]["weather"]
@@ -614,7 +616,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     >();
     const uploadedReceiptFiles = new Map<string, ReceiptFile>();
     const ocrReceipts = new Map<string, Partial<Receipt>>();
-    const nextOutbox = await processOutbox(snapshot.outbox, async (item) => {
+    let nextOutbox: AppState["outbox"];
+    try {
+      nextOutbox = await processOutbox(snapshot.outbox, async (item) => {
       if (item.type === "diary_entry") {
         const entry = item.payload as DiaryEntry;
         if (
@@ -707,7 +711,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return String(data.id);
       }
       return item.localId;
-    });
+      });
+    } catch (error) {
+      void recordClientError({ source: "sync", error, safeMessage: "Synchronizácia sa neočakávane prerušila.", context: { operation: "process_outbox", pendingCount: snapshot.outbox.length }, projectId: snapshot.selectedProjectId });
+      void recordSyncRun({ status: "failed", pendingBefore: snapshot.outbox.length, pendingAfter: snapshot.outbox.length, failedCount: snapshot.outbox.filter((item) => item.status === "failed").length, durationMs: Date.now() - startedAt, error, projectId: snapshot.selectedProjectId });
+      throw error;
+    }
     const statusFor = (type: AppState["outbox"][number]["type"], id: string) =>
       nextOutbox.find((item) => item.type === type && item.localId === id)
         ?.status ?? "pending";
@@ -753,6 +762,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           },
       ),
     }));
+    const failedCount = nextOutbox.filter((item) => item.status === "failed").length;
+    const pendingAfter = nextOutbox.filter((item) => item.status !== "synced").length;
+    void recordSyncRun({
+      status: failedCount ? "partial" : "success",
+      pendingBefore: snapshot.outbox.length,
+      pendingAfter,
+      failedCount,
+      durationMs: Date.now() - startedAt,
+      projectId: snapshot.selectedProjectId,
+    });
   }, [persist]);
   const refreshWorkforce = useCallback(async () => {
     if (!selectedProject || !supabase) return;

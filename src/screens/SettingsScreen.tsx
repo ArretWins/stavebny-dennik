@@ -1,6 +1,6 @@
 import React from "react";
 import { Alert, StyleSheet, Text } from "react-native";
-import { Crown, LogOut } from "lucide-react-native";
+import { Crown, FileWarning, LogOut, ShieldCheck } from "lucide-react-native";
 import {
   ScreenShell,
   TopBar,
@@ -48,6 +48,16 @@ export function SettingsScreen({ navigation }: { navigation: any }) {
       <Card>
         <Text style={styles.heading}>{t("settings.limitsTitle")}</Text>
         <Text style={styles.note}>{t("settings.limits")}</Text>
+      </Card>
+      <Card>
+        <Text style={styles.heading}>{t("support.title")}</Text>
+        <Text style={styles.note}>{t("support.settingsHint")}</Text>
+        <SecondaryButton title={t("support.open")} icon={FileWarning} onPress={() => navigation.navigate("Support")} />
+      </Card>
+      <Card>
+        <Text style={styles.heading}>{t("privacy.title")}</Text>
+        <Text style={styles.note}>{t("privacy.settingsHint")}</Text>
+        <SecondaryButton title={t("privacy.open")} icon={ShieldCheck} onPress={() => navigation.navigate("Privacy")} />
       </Card>
       {!isSupabaseConfigured ? (
         <Text style={styles.warning}>{t("errors.config")}</Text>

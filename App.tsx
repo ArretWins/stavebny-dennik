@@ -27,6 +27,9 @@ import { RequestReceiptLinkScreen } from "@/screens/RequestReceiptLinkScreen";
 import { NotificationsScreen } from "@/screens/NotificationsScreen";
 import { PilotAccountScreen } from "@/screens/PilotAccountScreen";
 import { GalleryScreen } from "@/screens/GalleryScreen";
+import { SupportScreen } from "@/screens/SupportScreen";
+import { PrivacyScreen } from "@/screens/PrivacyScreen";
+import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 
 export type RootStackParamList = {
   Auth: undefined;
@@ -46,6 +49,8 @@ export type RootStackParamList = {
   PilotAccount: undefined;
   Settings: undefined;
   Gallery: undefined;
+  Support: undefined;
+  Privacy: undefined;
 };
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const linking: LinkingOptions<RootStackParamList> = {
@@ -126,6 +131,8 @@ function Navigation() {
             <Stack.Screen name="PilotAccount" component={PilotAccountScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="Gallery" component={GalleryScreen} />
+            <Stack.Screen name="Support" component={SupportScreen} />
+            <Stack.Screen name="Privacy" component={PrivacyScreen} />
             <Stack.Screen
               name="PublicCheckin"
               component={PublicCheckinScreen}
@@ -147,11 +154,13 @@ function Navigation() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppProvider>
-        <StatusBar style="dark" />
-        <Navigation />
-      </AppProvider>
-    </AuthProvider>
+    <AppErrorBoundary>
+      <AuthProvider>
+        <AppProvider>
+          <StatusBar style="dark" />
+          <Navigation />
+        </AppProvider>
+      </AuthProvider>
+    </AppErrorBoundary>
   );
 }
