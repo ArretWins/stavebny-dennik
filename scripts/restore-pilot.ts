@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -20,6 +20,13 @@ function copiedTables(dataSql: string): string[] {
   for (const match of dataSql.matchAll(/^COPY\s+"([^"]+)"\."([^"]+)"/gm))
     tables.add(`"${match[1].replaceAll('"', '""')}"."${match[2].replaceAll('"', '""')}"`);
   return [...tables];
+}
+
+function withoutStorageCopies(dataSql: string): string {
+  return dataSql.replace(
+    /^COPY\s+"storage"\."[^"]+".*?^\\\.\r?\n?/gms,
+    "",
+  );
 }
 
 async function main() {
@@ -73,7 +80,11 @@ async function main() {
       ["--file", join(root, "database", name)],
       `restoring ${name}`,
     );
-  const dataSql = await readFile(join(root, "database", "data.sql"), "utf8");
+  const dataSql = withoutStorageCopies(
+    await readFile(join(root, "database", "data.sql"), "utf8"),
+  );
+  const restorableDataPath = join(root, "database", "data-restorable.sql");
+  await writeFile(restorableDataPath, dataSql, "utf8");
   const tables = copiedTables(dataSql);
   if (!tables.length) throw new Error("No COPY tables found in data.sql");
   runPsql(
@@ -88,13 +99,32 @@ async function main() {
   runPsql(
     psql,
     dbUrl,
-    ["--file", join(root, "database", "data.sql")],
+    ["--file", restorableDataPath],
     "restoring data.sql",
   );
   const client = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  const listedBuckets = await client.storage.listBuckets();
+  if (listedBuckets.error) throw listedBuckets.error;
+  const existingBuckets = new Set(
+    (listedBuckets.data || []).map((bucket) => bucket.id),
+  );
   for (const bucket of manifest.buckets || []) {
+    const options = {
+      public: Boolean(bucket.public),
+      fileSizeLimit:
+        typeof bucket.fileSizeLimit === "number"
+          ? bucket.fileSizeLimit
+          : undefined,
+      allowedMimeTypes: Array.isArray(bucket.allowedMimeTypes)
+        ? bucket.allowedMimeTypes
+        : undefined,
+    };
+    const configured = existingBuckets.has(bucket.id)
+      ? await client.storage.updateBucket(bucket.id, options)
+      : await client.storage.createBucket(bucket.id, options);
+    if (configured.error) throw configured.error;
     for (const file of bucket.files || []) {
       const storagePath = file.storagePath;
       if (typeof storagePath !== "string" || !storagePath)

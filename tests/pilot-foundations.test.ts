@@ -134,6 +134,8 @@ describe("static worker portal and recoverable backups", () => {
     expect(restore).toContain('RESTORE_CONFIRM !== "RESTORE"');
     expect(restore).toContain('RESTORE_CLEAR_TARGET !== "CLEAR"');
     expect(restore).toContain("TRUNCATE TABLE");
+    expect(restore).toContain("withoutStorageCopies");
+    expect(restore).toContain("createBucket");
     expect(restore).toContain("upsert: true");
     expect(restoreVerify).toContain("Restored object checksum mismatch");
     expect(restoreVerify).toContain("auth.users");

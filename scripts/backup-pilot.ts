@@ -10,7 +10,13 @@ type BackupFile = {
   sha256: string;
   storagePath?: string;
 };
-type BackupBucket = { id: string; files: BackupFile[] };
+type BackupBucket = {
+  id: string;
+  public: boolean;
+  fileSizeLimit: number | null;
+  allowedMimeTypes: string[] | null;
+  files: BackupFile[];
+};
 
 const dryRun = process.env.BACKUP_DRY_RUN === "1";
 const useLinkedDatabase = process.env.BACKUP_USE_LINKED === "1";
@@ -144,7 +150,13 @@ async function backupStorage(): Promise<BackupBucket[]> {
       }
     };
     await walk();
-    buckets.push({ id: bucket.id, files });
+    buckets.push({
+      id: bucket.id,
+      public: bucket.public,
+      fileSizeLimit: bucket.file_size_limit ?? null,
+      allowedMimeTypes: bucket.allowed_mime_types ?? null,
+      files,
+    });
   }
   return buckets;
 }
