@@ -1,5 +1,5 @@
 /// <reference path="./pdfmake.d.ts" />
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'npm:@supabase/supabase-js@^2.49.4';
 import pdfMakeImport from 'npm:pdfmake@0.2.20/build/pdfmake.js';
 import pdfFontsImport from 'npm:pdfmake@0.2.20/build/vfs_fonts.js';
 import { PDFDocument } from 'npm:pdf-lib@1.17.1';
