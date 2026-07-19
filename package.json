@@ -1,6 +1,6 @@
 {
   "name": "stavebny-dennik",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
@@ -12,6 +12,7 @@
     "lint:translations": "tsx scripts/check-translations.ts",
     "lint:copy": "tsx scripts/check-copy.ts",
     "build:worker-portal": "tsx scripts/build-worker-portal.ts",
+    "publish:android-release": "tsx scripts/publish-android-release.ts",
     "backup:pilot": "tsx scripts/backup-pilot.ts",
     "backup:verify": "tsx scripts/verify-backup.ts",
     "backup:restore": "tsx scripts/restore-pilot.ts",

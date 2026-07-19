@@ -1,0 +1,11 @@
+{
+  "version": "1.1.0",
+  "versionCode": 2,
+  "androidUrls": {
+    "arm64-v8a": "https://fjhgeudmcrbjpnduwhtb.supabase.co/storage/v1/object/public/app-releases/stavebny-dennik-1.1.0-arm64-v8a.apk",
+    "armeabi-v7a": "https://fjhgeudmcrbjpnduwhtb.supabase.co/storage/v1/object/public/app-releases/stavebny-dennik-1.1.0-armeabi-v7a.apk",
+    "x86": "https://fjhgeudmcrbjpnduwhtb.supabase.co/storage/v1/object/public/app-releases/stavebny-dennik-1.1.0-x86.apk",
+    "x86_64": "https://fjhgeudmcrbjpnduwhtb.supabase.co/storage/v1/object/public/app-releases/stavebny-dennik-1.1.0-x86_64.apk"
+  },
+  "publishedAt": "2026-07-19T00:00:00.000Z"
+}

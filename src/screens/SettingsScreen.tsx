@@ -1,6 +1,6 @@
-import React from "react";
-import { Alert, StyleSheet, Text } from "react-native";
-import { Crown, FileWarning, LogOut, ShieldCheck } from "lucide-react-native";
+import React, { useState } from "react";
+import { Alert, Linking, StyleSheet, Text } from "react-native";
+import { Crown, Download, FileWarning, LogOut, ShieldCheck } from "lucide-react-native";
 import {
   ScreenShell,
   TopBar,
@@ -12,9 +12,33 @@ import { colors } from "@/theme/tokens";
 import { t } from "@/i18n";
 import { isSupabaseConfigured } from "@/services/supabase";
 import { useAuth } from "@/state/auth";
+import { checkForAppUpdate } from "@/services/appUpdates";
 
 export function SettingsScreen({ navigation }: { navigation: any }) {
   const { email, signOut } = useAuth();
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const checkUpdate = async () => {
+    setCheckingUpdate(true);
+    try {
+      const result = await checkForAppUpdate();
+      if (!result.available) {
+        Alert.alert(t("settings.updateTitle"), t("settings.updateCurrent", { version: result.currentVersion }));
+        return;
+      }
+      Alert.alert(
+        t("settings.updateAvailable"),
+        t("settings.updateAvailableHint", { version: result.manifest.version }),
+        [
+          { text: t("app.cancel"), style: "cancel" },
+          { text: t("settings.downloadUpdate"), onPress: () => void Linking.openURL(result.downloadUrl) },
+        ],
+      );
+    } catch {
+      Alert.alert(t("settings.updateTitle"), t("settings.updateFailed"));
+    } finally {
+      setCheckingUpdate(false);
+    }
+  };
   return (
     <ScreenShell>
       <TopBar title={t("settings.title")} onBack={() => navigation.goBack()} />
@@ -35,6 +59,16 @@ export function SettingsScreen({ navigation }: { navigation: any }) {
       <Card>
         <Text style={styles.heading}>{t("settings.language")}</Text>
         <Text style={styles.value}>{t("settings.slovakOnly")}</Text>
+      </Card>
+      <Card>
+        <Text style={styles.heading}>{t("settings.updateTitle")}</Text>
+        <Text style={styles.note}>{t("settings.updateHint")}</Text>
+        <SecondaryButton
+          title={checkingUpdate ? t("app.loading") : t("settings.checkUpdate")}
+          icon={Download}
+          disabled={checkingUpdate}
+          onPress={() => void checkUpdate()}
+        />
       </Card>
       <Card>
         <Text style={styles.heading}>{t("pilotAccount.title")}</Text>
