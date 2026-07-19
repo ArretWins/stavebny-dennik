@@ -92,7 +92,7 @@ describe("compressed uploads and metered functions", () => {
       ocr.indexOf("p_feature_key: 'receipt_ocr'"),
     );
     expect(ocr).toContain("status: 402");
-    expect(report).toContain('p_feature_key: "receipt_exports"');
+    expect(report).toMatch(/p_feature_key:\s*["']receipt_exports["']/);
     expect(report).toContain("track_analytics_event");
   });
 });
