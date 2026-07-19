@@ -116,15 +116,6 @@ async function main() {
     ["--file", restorableDataPath],
     "restoring data.sql",
   );
-  runPsql(
-    psql,
-    dbUrl,
-    [
-      "--command",
-      "SET ROLE supabase_auth_admin; SELECT setval('auth.refresh_tokens_id_seq', GREATEST(COALESCE((SELECT max(id) FROM auth.refresh_tokens), 1), 1), true); RESET ROLE;",
-    ],
-    "synchronizing Auth sequences",
-  );
   const client = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });

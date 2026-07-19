@@ -135,7 +135,6 @@ describe("static worker portal and recoverable backups", () => {
     expect(restore).toContain('RESTORE_CLEAR_TARGET !== "CLEAR"');
     expect(restore).toContain("TRUNCATE TABLE");
     expect(restore).toContain("DROP SCHEMA IF EXISTS public CASCADE");
-    expect(restore).toContain("supabase_auth_admin");
     expect(restore).toContain("withoutStorageCopies");
     expect(restore).toContain("createBucket");
     expect(restore).toContain("upsert: true");
