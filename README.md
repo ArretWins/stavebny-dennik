@@ -6,7 +6,7 @@ Android-first Expo/React Native application for a Slovak construction foreman. I
 
 1. Copy `.env.example` to `.env` and fill the public Supabase values. Without them, the foreman app remains usable in offline demo mode, while QR worker onboarding and OCR require the server.
 2. Run `npm install`.
-3. Run `npm run android` for development or build `android/app/build/outputs/apk/release/app-release.apk` with `android\gradlew.bat assembleRelease`.
+3. Run `npm run android` for development. Signed releases require the four `STAVBA_UPLOAD_*` signing variables and are built with `android\gradlew.bat assembleRelease bundleRelease`; Gradle produces one APK per supported ABI and an AAB.
 4. Run `npm run validate` before every handoff.
 
 ## Server setup
@@ -53,8 +53,12 @@ The `Pilot backup` GitHub Actions workflow runs daily and retains repository art
 ## Verification
 
 - `npm run validate`: TypeScript, Slovak translation keys, visible-copy checks and Vitest.
-- `deno check --node-modules-dir=auto --lock=deno.lock supabase/functions/*/index.ts`: Edge Function type checking.
+- `deno check --no-lock --node-modules-dir=auto supabase/functions/*/index.ts`: all six Edge Functions; the same gate runs in GitHub Actions.
 - The release APK is visually tested on the `codex-api35` Android emulator; screenshots are stored in `test-artifacts/emulator`.
+
+## Android pilot distribution
+
+Version 1.1.0 is signed with the permanent upload key. Four ABI-specific APKs are stored in the public `app-releases` Supabase bucket; only the service role can publish or replace them. The app checks the HTTPS manifest at `https://stavebny-dennik-worker.pages.dev/app-version.json` only when the user taps **Skontrolovať aktualizáciu** in settings, validates the download host and selects the APK matching the device architecture. The signed AAB and all APKs are also retained as a private GitHub Actions artifact for 30 days.
 
 ## Release boundary
 

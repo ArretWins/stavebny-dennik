@@ -20,6 +20,10 @@ jobs:
           deno-version: v2.x
       - name: Check Supabase Edge Functions
         run: >-
-          deno check --no-lock --node-modules-dir=manual
+          deno check --no-lock --node-modules-dir=auto
+          supabase/functions/dispatch-notifications/index.ts
+          supabase/functions/generate-receipt-report/index.ts
           supabase/functions/worker-checkin/index.ts
           supabase/functions/generate-report/index.ts
+          supabase/functions/process-receipt-ocr/index.ts
+          supabase/functions/worker-portal/index.ts
