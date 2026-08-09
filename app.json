@@ -2,27 +2,28 @@
   "expo": {
     "name": "Stavebný denník",
     "slug": "stavebny-dennik",
-    "version": "1.1.0",
+    "version": "1.2.0",
+    "newArchEnabled": false,
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "scheme": "stavebnydennik",
     "android": {
       "package": "sk.stavebnydennik.app",
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#F8F5EF"
       },
       "blockedPermissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.WRITE_EXTERNAL_STORAGE"
       ],
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
-        "CAMERA"
+        "CAMERA",
+        "RECORD_AUDIO"
       ]
     },
     "plugins": [
@@ -31,6 +32,17 @@
       "expo-image-picker",
       "expo-location",
       "expo-asset",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Povoľte aplikácii Stavebný denník použiť mikrofón na hlasový návrh zápisu.",
+          "speechRecognitionPermission": "Povoľte aplikácii Stavebný denník prepísať hlas do textu.",
+          "androidSpeechServicePackages": [
+            "com.google.android.googlequicksearchbox",
+            "com.google.android.tts"
+          ]
+        }
+      ],
       [
         "expo-notifications",
         {

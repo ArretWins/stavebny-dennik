@@ -4,6 +4,7 @@ import { Check, FileText, Share2 } from 'lucide-react-native';
 import { Card, EmptyState, Field, PrimaryButton, ScreenShell, SecondaryButton, TextField, TopBar } from '@/components/ui';
 import { formatEuroAmount } from '@/domain/receipts';
 import { t } from '@/i18n';
+import { localDateIso } from '@/domain/ids';
 import { formatDateTime } from '@/i18n/format';
 import { generateLocalReceiptReport, generateRemoteReceiptReport, shareReceiptReport } from '@/services/receiptReports';
 import { supabase } from '@/services/supabase';
@@ -14,7 +15,7 @@ function monthStart(): string { const date = new Date(); return `${date.getFullY
 
 export function ReceiptReportsScreen({ navigation }: { navigation: any }) {
   const { selectedProject, state, addReceiptExport, syncNow } = useApp();
-  const [dateFrom, setDateFrom] = useState(monthStart()); const [dateTo, setDateTo] = useState(new Date().toISOString().slice(0, 10));
+  const [dateFrom, setDateFrom] = useState(monthStart()); const [dateTo, setDateTo] = useState(localDateIso());
   const [categoryIds, setCategoryIds] = useState<string[]>([]); const [excluded, setExcluded] = useState<string[]>([]); const [busy, setBusy] = useState(false);
   const candidates = useMemo(() => state.receipts.filter(receipt => receipt.projectId === selectedProject?.id && receipt.status === 'ready' && !!receipt.purchaseDate && receipt.purchaseDate >= dateFrom && receipt.purchaseDate <= dateTo && (!categoryIds.length || !!receipt.categoryId && categoryIds.includes(receipt.categoryId))), [categoryIds, dateFrom, dateTo, selectedProject?.id, state.receipts]);
   const selected = candidates.filter(receipt => !excluded.includes(receipt.id)); const total = selected.reduce((sum, receipt) => sum + (receipt.totalAmountCents ?? 0), 0);

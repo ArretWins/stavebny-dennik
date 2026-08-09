@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import * as Clipboard from 'expo-clipboard';
-import { Check, ClipboardList, Copy, ExternalLink, Link2, QrCode, RefreshCw, ShieldCheck, UserCheck, UserX, Users } from 'lucide-react-native';
+import { BadgeCheck, CalendarClock, Check, ClipboardList, Copy, ExternalLink, Link2, QrCode, RefreshCw, ShieldCheck, Store, UserCheck, UserX, Users } from 'lucide-react-native';
 import { Card, EmptyState, PrimaryButton, ScreenShell, SecondaryButton, TextField, TopBar, WarningActionButton } from '@/components/ui';
 import type { MaterialRequest, MaterialRequestStatus, ProjectWorker, WorkerStatus } from '@/domain/types';
 import { t } from '@/i18n';
@@ -23,24 +23,25 @@ function WorkerCard({ worker, busy, onStatus }: { worker: ProjectWorker; busy: b
   </Card>;
 }
 
-function RequestCard({ request, worker, items, linkedCount, busy, rejecting, rejectionReason, onRejecting, onReason, onStatus, onLink }: { request: MaterialRequest; worker?: ProjectWorker; items: Array<{ id: string; name: string; quantity: number; unit: string }>; linkedCount: number; busy: boolean; rejecting: boolean; rejectionReason: string; onRejecting: () => void; onReason: (value: string) => void; onStatus: (status: Exclude<MaterialRequestStatus, 'new'>, reason?: string) => void; onLink: () => void }) {
+function RequestCard({ request, worker, items, linkedCount, quoteCount, busy, rejecting, rejectionReason, onRejecting, onReason, onStatus, onLink, onProcurement }: { request: MaterialRequest; worker?: ProjectWorker; items: Array<{ id: string; name: string; quantity: number; unit: string }>; linkedCount: number; quoteCount: number; busy: boolean; rejecting: boolean; rejectionReason: string; onRejecting: () => void; onReason: (value: string) => void; onStatus: (status: Exclude<MaterialRequestStatus, 'new'>, reason?: string) => void; onLink: () => void; onProcurement: () => void }) {
   const canReject = request.status === 'new' || request.status === 'approved';
   return <Card style={{ ...styles.boardCard, ...(request.status === 'new' ? styles.pendingEdge : request.status === 'rejected' ? styles.closedEdge : styles.activeEdge) }}>
     <View style={styles.row}><ClipboardList color={request.status === 'new' ? colors.warning : colors.primary} size={27} /><View style={styles.flex}><Text style={styles.name}>{worker ? `${worker.firstName} ${worker.lastName}` : t('materialRequests.unknownWorker')}</Text><Text style={styles.meta}>{formatDateTime(request.createdAt)}{request.desiredDate ? ` · ${t('materialRequests.desired')} ${formatDate(request.desiredDate)}` : ''}</Text></View><View style={[styles.statusChip, request.status === 'new' ? styles.statusPending : styles.statusActive]}><Text style={[styles.statusText, request.status === 'new' ? styles.statusTextPending : styles.statusTextActive]}>{t(`materialRequests.status.${request.status}`)}</Text></View></View>
     <View style={styles.materialList}>{items.map(item => <View key={item.id} style={styles.materialRow}><Text style={styles.materialName}>{item.name}</Text><Text style={styles.materialAmount}>{item.quantity} {item.unit}</Text></View>)}</View>
     {request.comment ? <Text style={styles.comment}>{request.comment}</Text> : null}{request.rejectionReason ? <Text style={styles.rejection}>{request.rejectionReason}</Text> : null}
     {request.status === 'new' ? <PrimaryButton title={t('materialRequests.approve')} icon={Check} disabled={busy} onPress={() => onStatus('approved')} /> : null}
-    {request.status === 'approved' ? <View style={styles.buttonRow}><SecondaryButton title={t('materialRequests.partial')} disabled={busy} onPress={() => onStatus('partially_purchased')} style={styles.flex} /><PrimaryButton title={t('materialRequests.purchased')} disabled={busy} onPress={() => onStatus('purchased')} style={styles.flex} /></View> : null}
-    {request.status === 'partially_purchased' ? <PrimaryButton title={t('materialRequests.purchased')} icon={Check} disabled={busy} onPress={() => onStatus('purchased')} /> : null}
+    {request.status === 'approved' && quoteCount === 0 ? <View style={styles.buttonRow}><SecondaryButton title={t('materialRequests.partial')} disabled={busy} onPress={() => onStatus('partially_purchased')} style={styles.flex} /><PrimaryButton title={t('materialRequests.purchased')} disabled={busy} onPress={() => onStatus('purchased')} style={styles.flex} /></View> : null}
+    {request.status === 'partially_purchased' && quoteCount === 0 ? <PrimaryButton title={t('materialRequests.purchased')} icon={Check} disabled={busy} onPress={() => onStatus('purchased')} /> : null}
     {canReject && !rejecting ? <WarningActionButton title={t('materialRequests.reject')} icon={UserX} disabled={busy} onPress={onRejecting} /> : null}
     {rejecting ? <View style={styles.rejectBox}><TextField label={t('materialRequests.rejectionReason')} value={rejectionReason} onChangeText={onReason} placeholder={t('materialRequests.rejectionPlaceholder')} /><WarningActionButton title={t('materialRequests.confirmReject')} disabled={busy || !rejectionReason.trim()} onPress={() => onStatus('rejected', rejectionReason)} /></View> : null}
+    {request.status === 'approved' || request.status === 'partially_purchased' || request.status === 'purchased' ? <PrimaryButton title={quoteCount ? t('procurement.openWithCount', { count: quoteCount }) : t('procurement.open')} icon={Store} onPress={onProcurement} /> : null}
     {request.status === 'approved' || request.status === 'partially_purchased' || request.status === 'purchased' ? <SecondaryButton title={linkedCount ? t('materialRequests.linkedReceipts', { count: linkedCount }) : t('materialRequests.linkReceipt')} icon={Link2} onPress={onLink} /> : null}
   </Card>;
 }
 
-export function WorkforceScreen({ navigation }: { navigation: any }) {
+export function WorkforceScreen({ navigation, route }: { navigation: any; route: { params?: { tab?: Tab } } }) {
   const { selectedProject, state, refreshWorkforce, reviewWorker, updateMaterialRequest } = useApp();
-  const [tab, setTab] = useState<Tab>('workers'); const [invite, setInvite] = useState<{ link: string; expiresAt: string }>(); const [busyId, setBusyId] = useState<string>();
+  const [tab, setTab] = useState<Tab>(route.params?.tab ?? 'workers'); const [invite, setInvite] = useState<{ link: string; expiresAt: string }>(); const [busyId, setBusyId] = useState<string>();
   const [rejectingId, setRejectingId] = useState<string>(); const [rejectionReason, setRejectionReason] = useState(''); const [creatingInvite, setCreatingInvite] = useState(false);
   useEffect(() => {
     let active = true;
@@ -49,6 +50,9 @@ export function WorkforceScreen({ navigation }: { navigation: any }) {
     const timer = setInterval(() => { if (active) void refresh(); }, 5_000);
     return () => { active = false; clearInterval(timer); };
   }, [refreshWorkforce, selectedProject?.id]);
+  useEffect(() => {
+    if (route.params?.tab) setTab(route.params.tab);
+  }, [route.params?.tab]);
   const workers = useMemo(() => state.workers.filter(worker => worker.projectId === selectedProject?.id), [selectedProject?.id, state.workers]);
   const requests = useMemo(() => state.materialRequests.filter(request => request.projectId === selectedProject?.id), [selectedProject?.id, state.materialRequests]);
   if (!selectedProject) return <ScreenShell><TopBar title={t('workerManagement.title')} onBack={() => navigation.goBack()} /><EmptyState title={t('projects.noProjects')} /></ScreenShell>;
@@ -63,11 +67,13 @@ export function WorkforceScreen({ navigation }: { navigation: any }) {
     <TopBar title={t('workerManagement.title')} onBack={() => navigation.goBack()} right={<Pressable accessibilityLabel={t('app.retry')} onPress={() => { void refreshWorkforce().catch(() => Alert.alert(t('errors.generic'))); }} style={styles.refresh}><RefreshCw color={colors.text} size={20} /></Pressable>} />
     <View style={styles.tabs}><Pressable onPress={() => setTab('workers')} style={[styles.tab, tab === 'workers' && styles.tabActive]}><Users color={tab === 'workers' ? colors.primary : colors.textMuted} size={20} /><Text style={[styles.tabText, tab === 'workers' && styles.tabTextActive]}>{t('workerManagement.workers')} {pendingCount ? `· ${pendingCount}` : ''}</Text></Pressable><Pressable onPress={() => setTab('requests')} style={[styles.tab, tab === 'requests' && styles.tabActive]}><ClipboardList color={tab === 'requests' ? colors.primary : colors.textMuted} size={20} /><Text style={[styles.tabText, tab === 'requests' && styles.tabTextActive]}>{t('materialRequests.title')} {newRequestCount ? `· ${newRequestCount}` : ''}</Text></Pressable></View>
     {tab === 'workers' ? <>
+      <PrimaryButton title={t('timesheet.open')} icon={CalendarClock} onPress={() => navigation.navigate('Timesheet')} />
+      <SecondaryButton title={t('workerCredentials.open')} icon={BadgeCheck} onPress={() => navigation.navigate('WorkerCredentials')} />
       <Card style={styles.inviteCard}><View style={styles.row}><View style={styles.inviteIcon}><QrCode color={colors.primary} size={30} /></View><View style={styles.flex}><Text style={styles.sectionTitle}>{t('workerManagement.invite')}</Text><Text style={styles.meta}>{selectedProject.name} · {t('workerManagement.inviteHint')}</Text></View></View>{invite ? <><View style={styles.qr}><QRCode value={invite.link} size={190} color={colors.text} backgroundColor={colors.surface} /></View><Text style={styles.expiry}>{t('workerManagement.expires', { time: formatTime(invite.expiresAt) })}</Text><View style={styles.buttonRow}><SecondaryButton title={t('checkin.copyLink')} icon={Copy} onPress={() => void Clipboard.setStringAsync(invite.link)} style={styles.flex} /><SecondaryButton title={t('checkin.link')} icon={ExternalLink} onPress={() => void Linking.openURL(invite.link)} style={styles.flex} /></View></> : <PrimaryButton title={creatingInvite ? t('app.loading') : t('workerManagement.createQr')} icon={QrCode} disabled={creatingInvite} onPress={() => void createInvite()} />}</Card>
       <Text style={styles.sectionTitle}>{t('workerManagement.pending')}</Text>{workers.filter(worker => worker.status === 'pending').map(worker => <WorkerCard key={worker.id} worker={worker} busy={busyId === worker.id} onStatus={status => void changeWorker(worker, status)} />)}{!pendingCount ? <EmptyState title={t('workerManagement.noPending')} /> : null}
       <Text style={styles.sectionTitle}>{t('workerManagement.team')}</Text>{workers.filter(worker => worker.status !== 'pending').map(worker => <WorkerCard key={worker.id} worker={worker} busy={busyId === worker.id} onStatus={status => void changeWorker(worker, status)} />)}{!workers.some(worker => worker.status !== 'pending') ? <EmptyState title={t('workerManagement.noTeam')} /> : null}
     </> : <>
-      {requests.map(request => <RequestCard key={request.id} request={request} worker={workers.find(worker => worker.id === request.workerId)} items={state.materialRequestItems.filter(item => item.requestId === request.id)} linkedCount={state.receiptRequestLinks.filter(link => link.requestId === request.id).length} busy={busyId === request.id} rejecting={rejectingId === request.id} rejectionReason={rejectionReason} onRejecting={() => { setRejectingId(request.id); setRejectionReason(''); }} onReason={setRejectionReason} onStatus={(status, reason) => void changeRequest(request, status, reason)} onLink={() => navigation.navigate('RequestReceiptLink', { requestId: request.id })} />)}
+      {requests.map(request => <RequestCard key={request.id} request={request} worker={workers.find(worker => worker.id === request.workerId)} items={state.materialRequestItems.filter(item => item.requestId === request.id)} linkedCount={state.receiptRequestLinks.filter(link => link.requestId === request.id).length} quoteCount={(state.materialSupplierQuotes ?? []).filter(quote => quote.requestId === request.id && quote.status !== 'withdrawn').length} busy={busyId === request.id} rejecting={rejectingId === request.id} rejectionReason={rejectionReason} onRejecting={() => { setRejectingId(request.id); setRejectionReason(''); }} onReason={setRejectionReason} onStatus={(status, reason) => void changeRequest(request, status, reason)} onLink={() => navigation.navigate('RequestReceiptLink', { requestId: request.id })} onProcurement={() => navigation.navigate('MaterialProcurement', { requestId: request.id })} />)}
       {!requests.length ? <EmptyState title={t('materialRequests.empty')} hint={t('materialRequests.emptyHint')} /> : null}
     </>}
   </ScreenShell>;

@@ -43,4 +43,13 @@ describe("pilot release configuration", () => {
     expect(gradle).toContain(`versionCode ${update.versionCode}`);
     expect(gradle).toContain(`versionName "${update.version}"`);
   });
+
+  it("persists Supabase sessions in React Native storage", () => {
+    const client = readFileSync("src/services/supabase.ts", "utf8");
+    expect(client).toContain(
+      "import AsyncStorage from '@react-native-async-storage/async-storage'",
+    );
+    expect(client).toContain("storage: AsyncStorage");
+    expect(client).toContain("persistSession: true");
+  });
 });

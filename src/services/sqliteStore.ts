@@ -33,13 +33,20 @@ const SCHEMA = `
   CREATE TABLE IF NOT EXISTS material_request_items (id TEXT PRIMARY KEY NOT NULL, request_id TEXT NOT NULL, name TEXT NOT NULL, quantity REAL NOT NULL, unit TEXT NOT NULL, created_at TEXT NOT NULL);
   CREATE INDEX IF NOT EXISTS material_request_items_request_idx ON material_request_items(request_id);
   CREATE TABLE IF NOT EXISTS receipt_request_links (id TEXT PRIMARY KEY NOT NULL, owner_id TEXT NOT NULL, receipt_id TEXT NOT NULL, request_id TEXT NOT NULL, allocated_amount_cents INTEGER, created_at TEXT NOT NULL);
-  CREATE TABLE IF NOT EXISTS notifications (id TEXT PRIMARY KEY NOT NULL, type TEXT NOT NULL, title TEXT NOT NULL, body TEXT NOT NULL, read_at TEXT, created_at TEXT NOT NULL);
+  CREATE TABLE IF NOT EXISTS notifications (id TEXT PRIMARY KEY NOT NULL, type TEXT NOT NULL, title TEXT NOT NULL, body TEXT NOT NULL, data TEXT NOT NULL DEFAULT '{}', read_at TEXT, created_at TEXT NOT NULL);
 `;
 
 export function openLocalDatabase(): SQLite.SQLiteDatabase {
   if (database) return database;
   database = SQLite.openDatabaseSync(DATABASE_NAME);
   database.execSync(SCHEMA);
+  try {
+    database.execSync(
+      "ALTER TABLE notifications ADD COLUMN data TEXT NOT NULL DEFAULT '{}'",
+    );
+  } catch {
+    /* column already exists */
+  }
   return database;
 }
 
@@ -64,7 +71,7 @@ export async function loadStateFromSqlite(): Promise<AppState | undefined> {
   const materialRequests = localDatabase.getAllSync<MaterialRequest>('SELECT id, owner_id AS ownerId, project_id AS projectId, worker_id AS workerId, desired_date AS desiredDate, comment, status, rejection_reason AS rejectionReason, created_at AS createdAt, updated_at AS updatedAt FROM material_requests ORDER BY created_at DESC');
   const materialRequestItems = localDatabase.getAllSync<MaterialRequestItem>('SELECT id, request_id AS requestId, name, quantity, unit, created_at AS createdAt FROM material_request_items ORDER BY created_at');
   const receiptRequestLinks = localDatabase.getAllSync<ReceiptRequestLink>('SELECT id, owner_id AS ownerId, receipt_id AS receiptId, request_id AS requestId, allocated_amount_cents AS allocatedAmountCents, created_at AS createdAt FROM receipt_request_links ORDER BY created_at');
-  const notifications = localDatabase.getAllSync<AppNotification>('SELECT id, type, title, body, read_at AS readAt, created_at AS createdAt FROM notifications ORDER BY created_at DESC');
+  const notifications = localDatabase.getAllSync<Omit<AppNotification, 'data'> & { data: string }>('SELECT id, type, title, body, data, read_at AS readAt, created_at AS createdAt FROM notifications ORDER BY created_at DESC').map(item => ({ ...item, data: JSON.parse(item.data || '{}') }));
   return { ...core, receiptCategories, receipts, receiptFiles, receiptExports, workers, materialRequests, materialRequestItems, receiptRequestLinks, notifications, outbox: loadOutbox(localDatabase) };
 }
 
@@ -98,7 +105,7 @@ export function saveStateToSqlite(state: AppState): Promise<void> {
       for (const item of materialRequests) localDatabase.runSync('INSERT INTO material_requests VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', item.id, item.ownerId, item.projectId, item.workerId, item.desiredDate ?? null, item.comment ?? null, item.status, item.rejectionReason ?? null, item.createdAt, item.updatedAt);
       for (const item of materialRequestItems) localDatabase.runSync('INSERT INTO material_request_items VALUES (?, ?, ?, ?, ?, ?)', item.id, item.requestId, item.name, item.quantity, item.unit, item.createdAt);
       for (const item of receiptRequestLinks) localDatabase.runSync('INSERT INTO receipt_request_links VALUES (?, ?, ?, ?, ?, ?)', item.id, item.ownerId, item.receiptId, item.requestId, item.allocatedAmountCents ?? null, item.createdAt);
-      for (const item of notifications) localDatabase.runSync('INSERT INTO notifications VALUES (?, ?, ?, ?, ?, ?)', item.id, item.type, item.title, item.body, item.readAt ?? null, item.createdAt);
+      for (const item of notifications) localDatabase.runSync('INSERT INTO notifications (id, type, title, body, data, read_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)', item.id, item.type, item.title, item.body, JSON.stringify(item.data ?? {}), item.readAt ?? null, item.createdAt);
     });
   });
   writeQueue = write.catch(() => undefined);

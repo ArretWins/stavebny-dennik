@@ -1,5 +1,6 @@
-import type { AppNotification, MaterialRequest, MaterialRequestItem, MaterialRequestStatus, ProjectWorker, ReceiptRequestLink, WorkerStatus } from '@/domain/types';
+import type { AppNotification, MaterialRequest, MaterialRequestItem, MaterialRequestStatus, MaterialSupplierQuote, ProjectWorker, ReceiptRequestLink, WorkerStatus } from '@/domain/types';
 import { supabase } from './supabase';
+import { listProjectSupplierQuotes } from './procurementRepository';
 
 function workerFromRow(row: Record<string, unknown>): ProjectWorker {
   return {
@@ -27,18 +28,19 @@ export async function createProjectWorkerInvite(projectId: string): Promise<{ to
   return { token: data, expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString() };
 }
 
-export async function listProjectWorkforce(projectId: string): Promise<{ workers: ProjectWorker[]; requests: MaterialRequest[]; items: MaterialRequestItem[]; links: ReceiptRequestLink[] }> {
-  if (!supabase) return { workers: [], requests: [], items: [], links: [] };
-  const [workerResult, requestResult] = await Promise.all([
+export async function listProjectWorkforce(projectId: string): Promise<{ workers: ProjectWorker[]; requests: MaterialRequest[]; items: MaterialRequestItem[]; links: ReceiptRequestLink[]; quotes: MaterialSupplierQuote[] }> {
+  if (!supabase) return { workers: [], requests: [], items: [], links: [], quotes: [] };
+  const [workerResult, requestResult, quotes] = await Promise.all([
     supabase.from('project_workers').select('*').eq('project_id', projectId).order('created_at', { ascending: false }),
     supabase.from('material_requests').select('*, material_request_items(*), receipt_request_links(*)').eq('project_id', projectId).order('created_at', { ascending: false }),
+    listProjectSupplierQuotes(projectId),
   ]);
   if (workerResult.error) throw workerResult.error;
   if (requestResult.error) throw requestResult.error;
   const requests = (requestResult.data ?? []).map(requestFromRow);
   const items: MaterialRequestItem[] = (requestResult.data ?? []).flatMap(row => (row.material_request_items ?? []).map((item: Record<string, unknown>) => ({ id: String(item.id), requestId: String(item.request_id), name: String(item.name), quantity: Number(item.quantity), unit: String(item.unit), createdAt: String(item.created_at) })));
   const links: ReceiptRequestLink[] = (requestResult.data ?? []).flatMap(row => (row.receipt_request_links ?? []).map((link: Record<string, unknown>) => ({ id: String(link.id), ownerId: String(link.owner_id), receiptId: String(link.receipt_id), requestId: String(link.request_id), allocatedAmountCents: link.allocated_amount_cents === null || link.allocated_amount_cents === undefined ? undefined : Number(link.allocated_amount_cents), createdAt: String(link.created_at) })));
-  return { workers: (workerResult.data ?? []).map(workerFromRow), requests, items, links };
+  return { workers: (workerResult.data ?? []).map(workerFromRow), requests, items, links, quotes };
 }
 
 export async function setProjectWorkerStatus(workerId: string, status: Exclude<WorkerStatus, 'pending'>, reviewerId: string): Promise<ProjectWorker> {
@@ -72,7 +74,7 @@ export async function listNotifications(): Promise<AppNotification[]> {
   if (!supabase) return [];
   const { data, error } = await supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(100);
   if (error) throw error;
-  return (data ?? []).map(row => ({ id: String(row.id), type: row.notification_type as AppNotification['type'], title: String(row.title), body: String(row.body), readAt: row.read_at ? String(row.read_at) : undefined, createdAt: String(row.created_at) }));
+  return (data ?? []).map(row => ({ id: String(row.id), type: row.notification_type as AppNotification['type'], title: String(row.title), body: String(row.body), data: (row.data ?? {}) as Record<string, unknown>, readAt: row.read_at ? String(row.read_at) : undefined, createdAt: String(row.created_at) }));
 }
 
 export async function markNotificationRead(id: string): Promise<void> {

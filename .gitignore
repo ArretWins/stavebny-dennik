@@ -5,6 +5,7 @@ backups/
 .wrangler/
 supabase/.temp/
 dist/
+dist-android*/
 web-build/
 output/
 tmp/

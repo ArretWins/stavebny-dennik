@@ -4,6 +4,47 @@ import type { AppState } from "@/domain/types";
 import { clearAppState } from "./localStore";
 import { supabase } from "./supabase";
 
+const PRIVATE_BUCKETS = ["attachments", "reports", "receipts", "plans"] as const;
+
+async function listOwnedFiles(
+  bucket: (typeof PRIVATE_BUCKETS)[number],
+  path: string,
+): Promise<string[]> {
+  if (!supabase) return [];
+  const files: string[] = [];
+  let offset = 0;
+  for (;;) {
+    const result = await supabase.storage.from(bucket).list(path, {
+      limit: 100,
+      offset,
+      sortBy: { column: "name", order: "asc" },
+    });
+    if (result.error) throw result.error;
+    const entries = result.data ?? [];
+    for (const entry of entries) {
+      const childPath = `${path}/${entry.name}`;
+      if (entry.id) files.push(childPath);
+      else files.push(...(await listOwnedFiles(bucket, childPath)));
+    }
+    if (entries.length < 100) break;
+    offset += entries.length;
+  }
+  return files;
+}
+
+async function removeOwnedFiles(userId: string): Promise<void> {
+  if (!supabase) return;
+  for (const bucket of PRIVATE_BUCKETS) {
+    const files = await listOwnedFiles(bucket, userId);
+    for (let index = 0; index < files.length; index += 100) {
+      const result = await supabase.storage
+        .from(bucket)
+        .remove(files.slice(index, index + 100));
+      if (result.error) throw result.error;
+    }
+  }
+}
+
 export async function exportAccountData(localState: AppState): Promise<string> {
   let payload: unknown = {
     schemaVersion: 1,
@@ -29,6 +70,13 @@ export async function exportAccountData(localState: AppState): Promise<string> {
 
 export async function deleteAccountPermanently(): Promise<void> {
   if (supabase) {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+    if (error) throw error;
+    if (!user) throw new Error("AUTH_REQUIRED");
+    await removeOwnedFiles(user.id);
     const result = await supabase.rpc("delete_my_account", { p_confirmation: "DELETE" });
     if (result.error) throw result.error;
   }

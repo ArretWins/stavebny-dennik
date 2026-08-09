@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ArrowDown, ArrowUp, Camera, FilePlus2, FileText, Images, Plus, Trash2 } from 'lucide-react-native';
 import { Card, Field, PrimaryButton, ScreenShell, SecondaryButton, TextArea, TextField, TopBar } from '@/components/ui';
-import { createId, nowIso } from '@/domain/ids';
+import { createId, localDateIso, nowIso } from '@/domain/ids';
 import { metadataDuplicateCandidates, parseEuroAmount, validateReceipt } from '@/domain/receipts';
 import type { Receipt, ReceiptFile } from '@/domain/types';
 import { t } from '@/i18n';
@@ -15,7 +15,7 @@ export function ReceiptEditorScreen({ navigation, route }: { navigation: any; ro
   const existing = state.receipts.find(receipt => receipt.id === route.params?.receiptId);
   const receiptId = useRef(existing?.id ?? createId('receipt')).current;
   const categories = state.receiptCategories.filter(category => category.ownerId === (existing?.ownerId ?? state.receiptCategories[0]?.ownerId));
-  const [purchaseDate, setPurchaseDate] = useState(existing?.purchaseDate ?? new Date().toISOString().slice(0, 10));
+  const [purchaseDate, setPurchaseDate] = useState(existing?.purchaseDate ?? localDateIso());
   const [seller, setSeller] = useState(existing?.seller ?? '');
   const [amount, setAmount] = useState(existing?.totalAmountCents === undefined ? '' : (existing.totalAmountCents / 100).toFixed(2).replace('.', ','));
   const [categoryId, setCategoryId] = useState(existing?.categoryId ?? categories[0]?.id);

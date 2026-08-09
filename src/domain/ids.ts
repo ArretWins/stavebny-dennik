@@ -4,3 +4,10 @@ export function createId(prefix: string): string {
 }
 
 export function nowIso(): string { return new Date().toISOString(); }
+
+export function localDateIso(value = new Date()): string {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, '0');
+  const day = String(value.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}

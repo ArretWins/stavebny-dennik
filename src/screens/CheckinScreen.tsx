@@ -8,12 +8,12 @@ import { colors, spacing } from '@/theme/tokens';
 import { formatTime } from '@/i18n/format';
 import { t } from '@/i18n';
 import { createCheckinToken, validateCheckinToken } from '@/domain/qr';
-import { createId, nowIso } from '@/domain/ids';
+import { createId, localDateIso, nowIso } from '@/domain/ids';
 import { useApp } from '@/state/app';
 import { supabase } from '@/services/supabase';
 
 export function CheckinScreen({ navigation }: { navigation: any }) {
-  const { selectedProject, state } = useApp(); const today = new Date().toISOString().slice(0, 10); const [copied, setCopied] = useState(false); const [token, setToken] = useState('');
+  const { selectedProject, state } = useApp(); const today = localDateIso(); const [copied, setCopied] = useState(false); const [token, setToken] = useState('');
   const fallbackToken = useMemo(() => selectedProject ? createCheckinToken({ projectId: selectedProject.id, ownerId: selectedProject.ownerId, date: today, expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(), action: 'checkin', nonce: createId('token') }) : '', [selectedProject?.id, selectedProject?.ownerId, today]);
   useEffect(() => { let active = true; if (!selectedProject) return; if (!supabase) { setToken(fallbackToken); return; } void supabase.rpc('create_checkin_token', { p_project_id: selectedProject.id, p_date: today }).then(({ data }) => { if (active && typeof data === 'string') setToken(data); else if (active) setToken(fallbackToken); }); return () => { active = false; }; }, [fallbackToken, selectedProject?.id, today]);
   if (!selectedProject) return <ScreenShell><EmptyState title={t('projects.noProjects')} /></ScreenShell>;

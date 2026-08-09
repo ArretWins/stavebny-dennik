@@ -73,6 +73,201 @@
           </button>
           <p class="muted hidden" id="push-enabled">Upozornenia sú povolené.</p>
         </div>
+        <div class="card attendance-card" id="attendance">
+          <div class="section-heading">
+            <div>
+              <span class="site-mark">DOCHÁDZKA</span>
+              <h2>Moja smena</h2>
+              <p class="muted" id="shift-state">Načítavam dnešnú smenu…</p>
+            </div>
+            <strong id="shift-clock">Mimo</strong>
+          </div>
+          <div id="shift-end-fields" class="hidden">
+            <label for="shift-break">Prestávka v minútach</label>
+            <input
+              id="shift-break"
+              type="number"
+              min="0"
+              max="240"
+              step="1"
+              value="30"
+            />
+            <label for="shift-note">Poznámka k smene</label>
+            <textarea
+              id="shift-note"
+              maxlength="500"
+              rows="2"
+              placeholder="Voliteľné"
+            ></textarea>
+          </div>
+          <button type="button" id="shift-action">Začať smenu</button>
+          <div id="recent-shifts" class="shift-history"></div>
+        </div>
+        <div class="card safety-card" id="safety-briefings-card">
+          <div class="section-heading">
+            <div>
+              <span class="site-mark">BOZP</span>
+              <h2>Moje poučenia</h2>
+              <p class="muted">
+                Prečítajte celý text a potvrďte iba svoje vlastné oboznámenie.
+              </p>
+            </div>
+          </div>
+          <div id="safety-briefings"></div>
+        </div>
+        <div class="card credentials-card" id="credentials-card">
+          <div class="section-heading">
+            <div>
+              <span class="site-mark">DOKLADY</span>
+              <h2>Moja spôsobilosť</h2>
+              <p class="muted">
+                Skontrolujte platnosť svojich školení, prehliadok a oprávnení.
+              </p>
+            </div>
+          </div>
+          <div id="credentials"></div>
+        </div>
+        <div class="card incident-card" id="incidents-card">
+          <span class="site-mark">HSE · BEZPEČNOSŤ</span>
+          <h2>Nahlásiť udalosť alebo near miss</h2>
+          <p class="muted">
+            Nahláste úraz, škodu alebo nebezpečnú situáciu. Hlásenie uvidí
+            majster.
+          </p>
+          <form id="incident-form">
+            <label for="incident-type">Typ udalosti</label
+            ><select id="incident-type">
+              <option value="near_miss">Near miss</option>
+              <option value="injury">Úraz</option>
+              <option value="property_damage">Škoda na majetku</option>
+              <option value="environmental">Environmentálna udalosť</option>
+              <option value="safety_observation">Bezpečnostný postreh</option>
+            </select>
+            <label for="incident-severity">Závažnosť</label
+            ><select id="incident-severity">
+              <option value="low">Nízka</option>
+              <option value="moderate" selected>Stredná</option>
+              <option value="serious">Vážna</option>
+              <option value="critical">Kritická</option>
+            </select>
+            <label for="incident-time">Dátum a čas</label
+            ><input id="incident-time" type="datetime-local" required />
+            <label for="incident-location">Miesto</label
+            ><input id="incident-location" maxlength="160" required />
+            <label for="incident-description">Čo sa stalo</label
+            ><textarea
+              id="incident-description"
+              minlength="10"
+              maxlength="2000"
+              rows="4"
+              required
+            ></textarea>
+            <label for="incident-action">Čo ste urobili ihneď</label
+            ><textarea
+              id="incident-action"
+              maxlength="1000"
+              rows="3"
+            ></textarea>
+            <label for="incident-people">Zúčastnené osoby (voliteľné)</label
+            ><input id="incident-people" maxlength="500" />
+            <label class="incident-confirm"
+              ><input id="incident-confirm" type="checkbox" /><span
+                >Potvrdzujem, že údaje sú pravdivé a hlásenie chcem odoslať
+                majstrovi.</span
+              ></label
+            >
+            <button id="incident-submit" disabled>Odoslať hlásenie</button>
+          </form>
+          <h3>Moje hlásenia</h3>
+          <div id="incidents"></div>
+        </div>
+        <div class="card delivery-card" id="deliveries-card">
+          <span class="site-mark">DODÁVKA · KONTROLA</span>
+          <h2>Prevziať materiál</h2>
+          <p class="muted">
+            Porovnajte množstvo pri vykládke. Nejde o nahrávanie účtovného
+            dokladu.
+          </p>
+          <form id="delivery-form">
+            <label for="delivery-request">Schválená žiadosť</label
+            ><select id="delivery-request" required></select
+            ><label for="delivery-supplier">Dodávateľ</label
+            ><input id="delivery-supplier" maxlength="160" required /><label
+              for="delivery-note"
+              >Číslo dodacieho listu</label
+            ><input id="delivery-note" maxlength="100" /><label
+              for="delivery-time"
+              >Dátum a čas</label
+            ><input id="delivery-time" type="datetime-local" required />
+            <div id="delivery-lines"></div>
+            <label for="delivery-comment">Poznámka</label
+            ><textarea
+              id="delivery-comment"
+              maxlength="1000"
+              rows="3"
+            ></textarea
+            ><label class="incident-confirm"
+              ><input id="delivery-confirm" type="checkbox" /><span
+                >Potvrdzujem, že som množstvá skontroloval(a) pri prevzatí a
+                chcem ich odoslať majstrovi.</span
+              ></label
+            ><button id="delivery-submit" disabled>
+              Odoslať príjem dodávky
+            </button>
+          </form>
+          <h3>Moje prevzatia</h3>
+          <div id="deliveries"></div>
+        </div>
+        <div class="card stock-card" id="stock-card">
+          <span class="site-mark">SKLAD · HLÁSENIE POHYBU</span>
+          <h2>Nahlásiť spotrebu materiálu</h2>
+          <p class="muted">
+            Vyberte iba materiál zo svojej schválenej žiadosti. Pohyb zmení
+            sklad až po kontrole majstrom.
+          </p>
+          <form id="stock-form">
+            <label for="stock-item">Materiál</label
+            ><select id="stock-item" required></select>
+            <label for="stock-type">Druh pohybu</label
+            ><select id="stock-type" required>
+              <option value="usage">Spotreba</option>
+              <option value="waste">Odpad alebo poškodenie</option>
+              <option value="return">Vrátené na sklad</option>
+            </select>
+            <label for="stock-quantity">Množstvo</label
+            ><input
+              id="stock-quantity"
+              type="number"
+              min="0.01"
+              step="0.01"
+              required
+            />
+            <label for="stock-time">Dátum a čas</label
+            ><input id="stock-time" type="datetime-local" required />
+            <label for="stock-note">Poznámka</label
+            ><textarea id="stock-note" maxlength="1000" rows="3"></textarea>
+            <label class="incident-confirm"
+              ><input id="stock-confirm" type="checkbox" /><span
+                >Potvrdzujem správnosť materiálu, množstva a druhu pohybu a
+                odosielam hlásenie majstrovi.</span
+              ></label
+            ><button id="stock-submit" disabled>Odoslať pohyb materiálu</button>
+          </form>
+          <h3>Moje pohyby</h3>
+          <div id="stock-movements"></div>
+        </div>
+        <div class="card task-list-card">
+          <div class="section-heading">
+            <div>
+              <h2>Moje úlohy</h2>
+              <p class="muted">Zobrazujú sa iba úlohy pridelené vám.</p>
+            </div>
+            <button type="button" class="secondary compact" id="refresh-tasks">
+              Obnoviť
+            </button>
+          </div>
+          <div id="tasks"></div>
+        </div>
         <div class="card request-card">
           <h2>Nová žiadosť o materiál</h2>
           <form id="request-form">
@@ -101,7 +296,9 @@
         </div>
       </section>
     </main>
-    <footer><a href="/privacy.html">Ochrana súkromia a osobných údajov</a></footer>
+    <footer>
+      <a href="/privacy.html">Ochrana súkromia a osobných údajov</a>
+    </footer>
     <script src="/config.js"></script>
     <script type="module" src="/app.js"></script>
   </body>

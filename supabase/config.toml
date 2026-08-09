@@ -44,5 +44,11 @@ verify_jwt = true
 [functions.worker-portal]
 verify_jwt = false
 
+[functions.supplier-quote]
+verify_jwt = false
+
+[functions.diary-approval]
+verify_jwt = false
+
 [functions.dispatch-notifications]
 verify_jwt = true
