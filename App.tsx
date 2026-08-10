@@ -40,7 +40,6 @@ import { TasksScreen } from "@/screens/TasksScreen";
 import { TaskEditorScreen } from "@/screens/TaskEditorScreen";
 import { TaskEvidenceReportScreen } from "@/screens/TaskEvidenceReportScreen";
 import { WeeklyReportScreen } from "@/screens/WeeklyReportScreen";
-import { ControlTowerScreen } from "@/screens/ControlTowerScreen";
 import { MaterialProcurementScreen } from "@/screens/MaterialProcurementScreen";
 import { SyncCenterScreen } from "@/screens/SyncCenterScreen";
 import { RfiListScreen } from "@/screens/RfiListScreen";
@@ -111,7 +110,6 @@ export type RootStackParamList = {
     | undefined;
   TaskEvidenceReport: { taskId: string };
   WeeklyReport: undefined;
-  ControlTower: undefined;
   SyncCenter: undefined;
   RfiList: undefined;
   RfiEditor: {
@@ -270,7 +268,6 @@ function Navigation() {
               component={TaskEvidenceReportScreen}
             />
             <Stack.Screen name="WeeklyReport" component={WeeklyReportScreen} />
-            <Stack.Screen name="ControlTower" component={ControlTowerScreen} />
             <Stack.Screen name="SyncCenter" component={SyncCenterScreen} />
             <Stack.Screen name="RfiList" component={RfiListScreen} />
             <Stack.Screen name="RfiEditor" component={RfiEditorScreen} />

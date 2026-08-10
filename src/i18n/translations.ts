@@ -2219,7 +2219,8 @@ export const sk = {
     passwordShort: "Heslo musí mať aspoň 6 znakov.",
     emailRequired: "Zadajte e-mail.",
     invalidEmail: "Zadajte platný e-mail.",
-    config: "Pripojenie k serveru nie je nastavené. Dáta sa uložia lokálne.",
+    config:
+      "Pripojenie k serveru nie je nastavené. Prihlásenie je z bezpečnostných dôvodov zablokované.",
     weather: "Počasie sa nepodarilo načítať. Záznam môžete uložiť bez neho.",
     locationDenied: "Poloha nebola povolená. Záznam môžete uložiť bez GPS.",
     workRequired: "Popíšte vykonanú prácu.",

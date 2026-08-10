@@ -29,6 +29,9 @@ describe("pilot release configuration", () => {
       "ANDROID_UPLOAD_KEY_PASSWORD",
     ]) expect(workflow).toContain(secret);
     expect(workflow).toContain("assembleRelease bundleRelease");
+    expect(workflow).toContain("Resolve production application configuration");
+    expect(workflow).toContain("secrets.SUPABASE_URL");
+    expect(workflow).toContain("supabase projects api-keys");
     expect(workflow).toContain("retention-days: 30");
   });
 

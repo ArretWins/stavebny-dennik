@@ -1,23 +1,17 @@
-# Stavebný denník — v1.2.1
+# Stavebný denník — v1.2.2
 
-Simplified Android release — 10 August 2026.
+Authentication hotfix — 10 August 2026.
 
-## Changed
+## Fixed
 
-- Removed daily workday control from the visible application.
-- Removed quality and safety checklists from navigation.
-- Removed change orders, financial checkpoint and 14-day forecast.
-- Removed the tools and equipment register, including related task and tomorrow-plan shortcuts.
-- Simplified the dashboard, notifications and Control Tower recommendations.
-- Existing server data for removed modules remains preserved for safe rollback.
+- Removed the insecure offline email login fallback.
+- Unknown emails and incorrect passwords are now rejected by Supabase.
+- Signed Android builds fail when production server configuration is missing.
+- Android CI resolves the public Supabase client key from the authenticated project.
+- Removed the green Control Tower card and its route from the application.
 
 ## Verification
 
-- 280 automated tests across 82 files.
-- TypeScript, translation and visible-copy checks pass.
-- Removed routes are covered by a dedicated navigation regression test.
-
-## Limits
-
-- Evidence-grade workflow; it is not a qualified electronic-signature service or a replacement for certified government or accounting systems.
-- Slovak interface and no billing in this release.
+- Authentication fails closed without Supabase configuration.
+- Application, Android and update-manifest versions are aligned.
+- TypeScript, translation, copy and navigation regression checks pass.

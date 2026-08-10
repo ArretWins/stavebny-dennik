@@ -35,7 +35,13 @@ export function AuthScreen() {
         }
       }
       else await signIn(email, password);
-    } catch { setError(t('errors.auth')); }
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error && submitError.message === 'AUTH_CONFIG_MISSING'
+          ? t('errors.config')
+          : t('errors.auth'),
+      );
+    }
     finally { setBusy(false); }
   };
 

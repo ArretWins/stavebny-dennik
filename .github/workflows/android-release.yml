@@ -29,6 +29,22 @@ jobs:
         run: |
           test -n "$KEYSTORE_BASE64"
           printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/stavba-upload.jks
+      - name: Resolve production application configuration
+        shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        run: |
+          test -n "$SUPABASE_ACCESS_TOKEN"
+          test -n "$SUPABASE_PROJECT_REF"
+          test -n "$EXPO_PUBLIC_SUPABASE_URL"
+          anon_key="$(npx supabase projects api-keys --project-ref "$SUPABASE_PROJECT_REF" --output json | jq -r '.[] | select(.name == "anon") | .api_key')"
+          test -n "$anon_key"
+          test "$anon_key" != "null"
+          echo "EXPO_PUBLIC_SUPABASE_URL=$EXPO_PUBLIC_SUPABASE_URL" >> "$GITHUB_ENV"
+          echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=$anon_key" >> "$GITHUB_ENV"
+          echo "EXPO_PUBLIC_WORKER_PORTAL_URL=https://stavebny-dennik-worker.pages.dev" >> "$GITHUB_ENV"
       - name: Build signed APK and AAB
         working-directory: android
         env:

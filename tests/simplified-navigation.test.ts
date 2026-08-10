@@ -13,11 +13,13 @@ describe("simplified application navigation", () => {
       "ScheduleForecast",
       "DailyControlPlan",
       "Tools",
+      "ControlTower",
     ]) {
       expect(app).not.toContain('<Stack.Screen name="' + route + '"');
       expect(today).not.toContain('navigation.navigate("' + route + '")');
     }
 
     expect(today).not.toContain('t("dayClosure.title")');
+    expect(today).not.toContain('t("controlTower.dashboardTitle")');
   });
 });

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -20,8 +20,6 @@ import {
   AlertTriangle,
   CalendarClock,
   CalendarRange,
-  RadioTower,
-  ChevronRight,
 } from "lucide-react-native";
 import {
   ScreenShell,
@@ -40,13 +38,6 @@ import { t } from "@/i18n";
 import { weatherLabel } from "@/domain/weather";
 import { localDateIso } from "@/domain/ids";
 import { useApp } from "@/state/app";
-import {
-  projectCostForecast,
-  projectFinancialSummary,
-} from "@/domain/financialControl";
-import { projectProcurementCommitmentCents } from "@/domain/procurement";
-import { projectScheduleForecast } from "@/domain/scheduleForecast";
-import { projectControlTower } from "@/domain/controlTower";
 
 export function TodayScreen({ navigation }: { navigation: any }) {
   const {
@@ -92,145 +83,6 @@ export function TodayScreen({ navigation }: { navigation: any }) {
       item.projectId === selectedProject?.id &&
       item.kind === "defect" &&
       item.status === "review",
-  ).length;
-  const projectBudget = state.projectBudgets.find(
-    (item) => item.projectId === selectedProject?.id,
-  );
-  const projectReceipts = state.receipts.filter(
-    (item) => item.projectId === selectedProject?.id,
-  );
-  const financialSummary = useMemo(
-    () =>
-      projectFinancialSummary({
-        budget: projectBudget,
-        receipts: projectReceipts,
-        categories: state.receiptCategories,
-        changeOrders: state.changeOrders.filter(
-          (item) => item.projectId === selectedProject?.id,
-        ),
-        procurementCommitmentCents: projectProcurementCommitmentCents({
-          projectId: selectedProject?.id ?? "",
-          requests: state.materialRequests,
-          quotes: state.materialSupplierQuotes ?? [],
-          receiptLinks: state.receiptRequestLinks,
-        }),
-      }),
-    [
-      projectBudget,
-      selectedProject?.id,
-      state.changeOrders,
-      state.materialRequests,
-      state.materialSupplierQuotes,
-      state.receiptCategories,
-      state.receiptRequestLinks,
-      projectReceipts,
-    ],
-  );
-  const projectSchedule = state.projectSchedules.find(
-    (item) => item.projectId === selectedProject?.id,
-  );
-  const scheduleSummary = useMemo(
-    () =>
-      projectScheduleForecast({
-        projectId: selectedProject?.id ?? "",
-        today,
-        schedule: projectSchedule,
-        tasks: state.siteTasks,
-        delays: state.delayEvents,
-        materialRequests: state.materialRequests,
-        changeOrders: state.changeOrders,
-      }),
-    [
-      projectSchedule,
-      selectedProject?.id,
-      state.changeOrders,
-      state.delayEvents,
-      state.materialRequests,
-      state.siteTasks,
-      today,
-    ],
-  );
-  const costForecast = useMemo(
-    () =>
-      projectCostForecast({
-        summary: financialSummary,
-        budget: projectBudget,
-        receipts: projectReceipts,
-        today,
-        scheduleStartDate: projectSchedule?.startDate,
-        forecastCompletionDate: scheduleSummary.forecastCompletionDate,
-      }),
-    [
-      financialSummary,
-      projectBudget,
-      projectReceipts,
-      projectSchedule?.startDate,
-      scheduleSummary.forecastCompletionDate,
-      today,
-    ],
-  );
-  const controlTower = useMemo(
-    () =>
-      projectControlTower({
-        projectId: selectedProject?.id ?? "",
-        today,
-        tasks: state.siteTasks,
-        materialRequests: state.materialRequests,
-        workers: state.workers,
-        receipts: state.receipts,
-        checklists: state.projectChecklists,
-        changeOrders: state.changeOrders,
-        rfis: state.projectRfis,
-        tools: state.projectTools,
-        workShifts: state.workShifts,
-        safetyBriefings: state.safetyBriefings,
-        safetyBriefingRecipients: state.safetyBriefingRecipients,
-        workerCredentials: state.workerCredentials,
-        siteIncidents: state.siteIncidents,
-        materialDeliveries: state.materialDeliveries,
-        materialDeliveryLines: state.materialDeliveryLines,
-        materialStockMovements: state.materialStockMovements,
-        taskMaterialRequirements: state.taskMaterialRequirements,
-        taskToolRequirements: state.taskToolRequirements,
-        diaryApprovals: state.diaryApprovalRequests,
-        costForecast,
-        scheduleForecast: scheduleSummary,
-        failedSyncCount: failedCount,
-      }),
-    [
-      costForecast,
-      failedCount,
-      scheduleSummary,
-      selectedProject?.id,
-      state.changeOrders,
-      state.materialRequests,
-      state.projectChecklists,
-      state.projectRfis,
-      state.projectTools,
-      state.receipts,
-      state.siteTasks,
-      state.workers,
-      state.workerCredentials,
-      state.siteIncidents,
-      state.materialDeliveries,
-      state.materialDeliveryLines,
-      state.materialStockMovements,
-      state.taskMaterialRequirements,
-      state.taskToolRequirements,
-      state.diaryApprovalRequests,
-      today,
-    ],
-  );
-  const visibleControlActionCount = controlTower.actions.filter(
-    (item) =>
-      ![
-        "financial",
-        "schedule",
-        "tools",
-        "task_tools",
-        "checklists",
-        "change_orders",
-      ].includes(item.target),
   ).length;
   useEffect(() => {
     void refreshProjectData();
@@ -306,68 +158,6 @@ export function TodayScreen({ navigation }: { navigation: any }) {
           style={styles.action}
         />
       </View>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t("controlTower.open")}
-        onPress={() => navigation.navigate("ControlTower")}
-        style={({ pressed }) => [
-          styles.towerCard,
-          pressed && styles.towerPressed,
-        ]}
-      >
-        <View style={styles.towerHeader}>
-          <View style={styles.towerIcon}>
-            <RadioTower color={colors.surface} size={28} />
-          </View>
-          <View style={styles.flex}>
-            <Text style={styles.towerKicker}>
-              {t("controlTower.dashboardTitle")}
-            </Text>
-            <Text style={styles.towerTitle}>
-              {t(`controlTower.health.${controlTower.severity}.title`)}
-            </Text>
-          </View>
-          <View
-            style={[
-              styles.towerCount,
-              controlTower.severity === "critical" && styles.towerCountCritical,
-            ]}
-          >
-            <Text style={styles.towerCountText}>
-              {visibleControlActionCount}
-            </Text>
-          </View>
-          <ChevronRight color={colors.surface} size={22} />
-        </View>
-        <View style={styles.towerSignals}>
-          {controlTower.signals.map((signal) => (
-            <View style={styles.towerSignal} key={signal.key}>
-              <View
-                style={[
-                  styles.towerSignalBar,
-                  signal.severity === "critical"
-                    ? styles.towerSignalCritical
-                    : signal.severity === "high"
-                      ? styles.towerSignalHigh
-                      : signal.severity === "watch"
-                        ? styles.towerSignalWatch
-                        : styles.towerSignalClear,
-                ]}
-              />
-              <Text style={styles.towerSignalLabel}>
-                {t(`controlTower.signal.${signal.key}`)}
-              </Text>
-            </View>
-          ))}
-        </View>
-        <Text style={styles.towerHint}>
-          {visibleControlActionCount
-            ? t("controlTower.dashboardActions", {
-                count: visibleControlActionCount,
-              })
-            : t("controlTower.dashboardClear")}
-        </Text>
-      </Pressable>
       <Card>
         <Text style={styles.sectionTitle}>{t("dashboard.weatherTitle")}</Text>
         <View style={styles.weatherRow}>
