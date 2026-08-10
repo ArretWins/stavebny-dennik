@@ -9,7 +9,6 @@ import {
   HardHat,
   PackageCheck,
   ShieldCheck,
-  Wrench,
 } from "lucide-react-native";
 import {
   Card,
@@ -38,7 +37,6 @@ const riskTarget: Record<
   | "TaskEditor"
   | "WorkerCredentials"
   | "TaskMaterials"
-  | "TaskTools"
   | "SafetyBriefings"
 > = {
   task_blocked: "TaskEditor",
@@ -47,8 +45,8 @@ const riskTarget: Record<
   credential_invalid: "WorkerCredentials",
   materials_unplanned: "TaskMaterials",
   materials_shortage: "TaskMaterials",
-  tools_unplanned: "TaskTools",
-  tools_shortage: "TaskTools",
+  tools_unplanned: "TaskEditor",
+  tools_shortage: "TaskEditor",
   safety_unplanned: "SafetyBriefings",
 };
 
@@ -83,9 +81,9 @@ export function TomorrowPlanScreen({ navigation }: { navigation: any }) {
         workers: state.workers,
         credentials: state.workerCredentials,
         requirements: state.taskMaterialRequirements,
-        toolRequirements: state.taskToolRequirements,
+        toolRequirements: [],
         stock,
-        tools: state.projectTools,
+        tools: [],
         safetyBriefings: state.safetyBriefings,
         safetyRecipients: state.safetyBriefingRecipients,
       }),
@@ -95,9 +93,7 @@ export function TomorrowPlanScreen({ navigation }: { navigation: any }) {
       state.workers,
       state.workerCredentials,
       state.taskMaterialRequirements,
-      state.taskToolRequirements,
       stock,
-      state.projectTools,
       state.safetyBriefings,
       state.safetyBriefingRecipients,
     ],
@@ -123,7 +119,6 @@ export function TomorrowPlanScreen({ navigation }: { navigation: any }) {
       navigation.navigate(target);
     else if (target === "TaskMaterials")
       navigation.navigate(target, { taskId });
-    else if (target === "TaskTools") navigation.navigate(target, { taskId });
     else navigation.navigate(target);
   };
   return (
@@ -248,21 +243,6 @@ export function TomorrowPlanScreen({ navigation }: { navigation: any }) {
                 {t("tomorrowPlan.safety")}
               </Text>
             </View>
-            <View style={styles.readinessItem}>
-              <Wrench
-                color={
-                  item.tool.ready
-                    ? colors.primary
-                    : item.tool.requiredCount
-                      ? colors.danger
-                      : colors.warning
-                }
-                size={18}
-              />
-              <Text style={styles.readinessText}>
-                {item.tool.requiredCount}
-              </Text>
-            </View>
           </View>
           {item.material.allocations.length ? (
             <Text style={styles.materials}>
@@ -304,13 +284,6 @@ export function TomorrowPlanScreen({ navigation }: { navigation: any }) {
           </Text>
         </View>
         <View style={styles.resource}>
-          <Wrench color={colors.primaryDark} size={25} />
-          <Text style={styles.resourceNumber}>{plan.availableToolCount}</Text>
-          <Text style={styles.resourceLabel}>
-            {t("tomorrowPlan.toolsAvailable")}
-          </Text>
-        </View>
-        <View style={styles.resource}>
           <ClipboardCheck color={colors.primaryDark} size={25} />
           <Text style={styles.resourceNumber}>{plan.briefingCount}</Text>
           <Text style={styles.resourceLabel}>
@@ -325,15 +298,6 @@ export function TomorrowPlanScreen({ navigation }: { navigation: any }) {
           })}
           icon={CalendarDays}
           onPress={() => navigation.navigate("Tasks")}
-        />
-      ) : null}
-      {plan.unavailableToolCount ? (
-        <SecondaryButton
-          title={t("tomorrowPlan.fixTools", {
-            count: plan.unavailableToolCount,
-          })}
-          icon={Wrench}
-          onPress={() => navigation.navigate("Tools")}
         />
       ) : null}
     </ScreenShell>

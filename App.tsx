@@ -38,23 +38,13 @@ import { PlansScreen } from "@/screens/PlansScreen";
 import { PlanBoardScreen } from "@/screens/PlanBoardScreen";
 import { TasksScreen } from "@/screens/TasksScreen";
 import { TaskEditorScreen } from "@/screens/TaskEditorScreen";
-import { ChecklistsScreen } from "@/screens/ChecklistsScreen";
-import { ChecklistEditorScreen } from "@/screens/ChecklistEditorScreen";
 import { TaskEvidenceReportScreen } from "@/screens/TaskEvidenceReportScreen";
-import { ChangeOrdersScreen } from "@/screens/ChangeOrdersScreen";
-import { ChangeOrderEditorScreen } from "@/screens/ChangeOrderEditorScreen";
-import { FinancialControlScreen } from "@/screens/FinancialControlScreen";
-import { ScheduleForecastScreen } from "@/screens/ScheduleForecastScreen";
 import { WeeklyReportScreen } from "@/screens/WeeklyReportScreen";
 import { ControlTowerScreen } from "@/screens/ControlTowerScreen";
-import { DailyControlPlanScreen } from "@/screens/DailyControlPlanScreen";
 import { MaterialProcurementScreen } from "@/screens/MaterialProcurementScreen";
 import { SyncCenterScreen } from "@/screens/SyncCenterScreen";
 import { RfiListScreen } from "@/screens/RfiListScreen";
 import { RfiEditorScreen } from "@/screens/RfiEditorScreen";
-import { ToolsScreen } from "@/screens/ToolsScreen";
-import { ToolEditorScreen } from "@/screens/ToolEditorScreen";
-import { ToolReportsScreen } from "@/screens/ToolReportsScreen";
 import { TimesheetScreen } from "@/screens/TimesheetScreen";
 import { SafetyBriefingsScreen } from "@/screens/SafetyBriefingsScreen";
 import { SafetyBriefingEditorScreen } from "@/screens/SafetyBriefingEditorScreen";
@@ -68,7 +58,6 @@ import { MaterialStockScreen } from "@/screens/MaterialStockScreen";
 import { MaterialStockMovementScreen } from "@/screens/MaterialStockMovementScreen";
 import { TaskMaterialsScreen } from "@/screens/TaskMaterialsScreen";
 import { TomorrowPlanScreen } from "@/screens/TomorrowPlanScreen";
-import { TaskToolsScreen } from "@/screens/TaskToolsScreen";
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 import type { SiteTaskKind } from "@/domain/types";
 
@@ -120,16 +109,9 @@ export type RootStackParamList = {
         yRatio?: number;
       }
     | undefined;
-  Checklists: undefined;
-  ChecklistEditor: { templateKey?: string; checklistId?: string } | undefined;
   TaskEvidenceReport: { taskId: string };
-  ChangeOrders: undefined;
-  ChangeOrderEditor: { changeOrderId?: string } | undefined;
-  FinancialControl: undefined;
-  ScheduleForecast: undefined;
   WeeklyReport: undefined;
   ControlTower: undefined;
-  DailyControlPlan: undefined;
   SyncCenter: undefined;
   RfiList: undefined;
   RfiEditor: {
@@ -139,9 +121,6 @@ export type RootStackParamList = {
     xRatio?: number;
     yRatio?: number;
   };
-  Tools: undefined;
-  ToolEditor: { toolId?: string } | undefined;
-  ToolReports: undefined;
   Timesheet: undefined;
   SafetyBriefings: undefined;
   SafetyBriefingEditor: { briefingId?: string } | undefined;
@@ -156,7 +135,6 @@ export type RootStackParamList = {
   MaterialStockMovement: { requestItemId?: string } | undefined;
   TaskMaterials: { taskId?: string } | undefined;
   TomorrowPlan: undefined;
-  TaskTools: { taskId?: string } | undefined;
 };
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const navigationRef = createNavigationContainerRef<RootStackParamList>();
@@ -165,7 +143,6 @@ const linking: LinkingOptions<RootStackParamList> = {
   config: {
     screens: {
       PublicCheckin: "checkin",
-      ToolEditor: "tools/:toolId",
     },
   },
 };
@@ -288,40 +265,15 @@ function Navigation() {
             <Stack.Screen name="PlanBoard" component={PlanBoardScreen} />
             <Stack.Screen name="Tasks" component={TasksScreen} />
             <Stack.Screen name="TaskEditor" component={TaskEditorScreen} />
-            <Stack.Screen name="Checklists" component={ChecklistsScreen} />
-            <Stack.Screen
-              name="ChecklistEditor"
-              component={ChecklistEditorScreen}
-            />
             <Stack.Screen
               name="TaskEvidenceReport"
               component={TaskEvidenceReportScreen}
             />
-            <Stack.Screen name="ChangeOrders" component={ChangeOrdersScreen} />
-            <Stack.Screen
-              name="ChangeOrderEditor"
-              component={ChangeOrderEditorScreen}
-            />
-            <Stack.Screen
-              name="FinancialControl"
-              component={FinancialControlScreen}
-            />
-            <Stack.Screen
-              name="ScheduleForecast"
-              component={ScheduleForecastScreen}
-            />
             <Stack.Screen name="WeeklyReport" component={WeeklyReportScreen} />
             <Stack.Screen name="ControlTower" component={ControlTowerScreen} />
-            <Stack.Screen
-              name="DailyControlPlan"
-              component={DailyControlPlanScreen}
-            />
             <Stack.Screen name="SyncCenter" component={SyncCenterScreen} />
             <Stack.Screen name="RfiList" component={RfiListScreen} />
             <Stack.Screen name="RfiEditor" component={RfiEditorScreen} />
-            <Stack.Screen name="Tools" component={ToolsScreen} />
-            <Stack.Screen name="ToolEditor" component={ToolEditorScreen} />
-            <Stack.Screen name="ToolReports" component={ToolReportsScreen} />
             <Stack.Screen name="Timesheet" component={TimesheetScreen} />
             <Stack.Screen
               name="SafetyBriefings"
@@ -368,7 +320,6 @@ function Navigation() {
               component={TaskMaterialsScreen}
             />
             <Stack.Screen name="TomorrowPlan" component={TomorrowPlanScreen} />
-            <Stack.Screen name="TaskTools" component={TaskToolsScreen} />
             <Stack.Screen
               name="PublicCheckin"
               component={PublicCheckinScreen}

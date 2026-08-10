@@ -18,12 +18,12 @@ describe('tool register application integration', () => {
     expect(appState).toContain('resolvedProjectTools');
   });
 
-  it('exposes a scannable deep link and the full field workflow', () => {
+  it('keeps existing tool records intact without exposing the removed interface', () => {
     const navigation = readFileSync('App.tsx', 'utf8');
     const editor = readFileSync('src/screens/ToolEditorScreen.tsx', 'utf8');
     const register = readFileSync('src/screens/ToolsScreen.tsx', 'utf8');
-    expect(navigation).toContain('ToolEditor: \"tools/:toolId\"');
-    expect(navigation).toContain('<Stack.Screen name=\"Tools\"');
+    expect(navigation).not.toContain('ToolEditor: \"tools/:toolId\"');
+    expect(navigation).not.toContain('<Stack.Screen name=\"Tools\"');
     expect(editor).toContain('projectToolQrValue(existing.id)');
     expect(editor).toContain('issueProjectTool');
     expect(editor).toContain('returnProjectTool');

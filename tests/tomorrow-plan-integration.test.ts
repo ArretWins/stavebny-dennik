@@ -12,12 +12,14 @@ describe("tomorrow plan integration", () => {
     expect(tasks).toContain('navigation.navigate("TomorrowPlan")');
   });
 
-  it("offers direct fixes for every readiness risk", () => {
+  it("offers direct fixes for the readiness checks that remain enabled", () => {
     const screen = readFileSync("src/screens/TomorrowPlanScreen.tsx", "utf8");
     expect(screen).toContain('task_blocked: "TaskEditor"');
     expect(screen).toContain('credential_invalid: "WorkerCredentials"');
     expect(screen).toContain('materials_shortage: "TaskMaterials"');
-    expect(screen).toContain('tools_shortage: "TaskTools"');
+    expect(screen).toContain("toolRequirements: []");
+    expect(screen).not.toContain('navigation.navigate("Tools")');
+    expect(screen).not.toContain('navigation.navigate("TaskTools")');
     expect(screen).toContain('safety_unplanned: "SafetyBriefings"');
   });
 });

@@ -384,14 +384,6 @@ export function TaskEditorScreen({
               </Text>
             </View>
           </View>
-          <SecondaryButton
-            title={t("siteTasks.openSourceChecklist")}
-            onPress={() =>
-              navigation.navigate("ChecklistEditor", {
-                checklistId: existing.sourceChecklistId,
-              })
-            }
-          />
         </Card>
       ) : null}
       <TextField
@@ -510,12 +502,6 @@ export function TaskEditorScreen({
             title={t("taskMaterials.taskOpen")}
             onPress={() =>
               navigation.navigate("TaskMaterials", { taskId: existing.id })
-            }
-          />
-          <SecondaryButton
-            title={t("taskTools.taskOpen")}
-            onPress={() =>
-              navigation.navigate("TaskTools", { taskId: existing.id })
             }
           />
           <TaskTimeline

@@ -1,8 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
-  Modal,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -10,9 +8,7 @@ import {
 import {
   Bell,
   CalendarDays,
-  CheckCircle2,
   ChevronDown,
-  ClipboardCheck,
   CloudRain,
   Pause,
   Plus,
@@ -22,16 +18,10 @@ import {
   MapPinned,
   Users,
   AlertTriangle,
-  ShieldCheck,
-  FilePenLine,
-  CircleGauge,
   CalendarClock,
   CalendarRange,
   RadioTower,
   ChevronRight,
-  LockKeyhole,
-  X,
-  Hammer,
 } from "lucide-react-native";
 import {
   ScreenShell,
@@ -43,16 +33,11 @@ import {
   SyncBanner,
   EmptyState,
   IconButton,
-  TextArea,
 } from "@/components/ui";
 import { colors, spacing } from "@/theme/tokens";
 import { formatTime } from "@/i18n/format";
 import { t } from "@/i18n";
 import { weatherLabel } from "@/domain/weather";
-import {
-  dayClosureStatus as getDayClosureStatus,
-  summarizeDayClosure,
-} from "@/domain/dayClosure";
 import { localDateIso } from "@/domain/ids";
 import { useApp } from "@/state/app";
 import {
@@ -60,10 +45,8 @@ import {
   projectFinancialSummary,
 } from "@/domain/financialControl";
 import { projectProcurementCommitmentCents } from "@/domain/procurement";
-import { formatEuroAmount } from "@/domain/receipts";
 import { projectScheduleForecast } from "@/domain/scheduleForecast";
 import { projectControlTower } from "@/domain/controlTower";
-import { syncDayClosureReminder } from "@/services/pushNotifications";
 
 export function TodayScreen({ navigation }: { navigation: any }) {
   const {
@@ -72,13 +55,7 @@ export function TodayScreen({ navigation }: { navigation: any }) {
     pendingCount,
     refreshGallery,
     refreshProjectData,
-    confirmDayClosure,
   } = useApp();
-  const [closureOpen, setClosureOpen] = useState(false);
-  const [closureConfirmed, setClosureConfirmed] = useState(false);
-  const [correctionReason, setCorrectionReason] = useState("");
-  const [closureError, setClosureError] = useState("");
-  const [closingDay, setClosingDay] = useState(false);
   const today = localDateIso();
   const entries = state.diaryEntries
     .filter(
@@ -115,34 +92,6 @@ export function TodayScreen({ navigation }: { navigation: any }) {
       item.projectId === selectedProject?.id &&
       item.kind === "defect" &&
       item.status === "review",
-  ).length;
-  const checklistCount = state.projectChecklists.filter(
-    (item) => item.projectId === selectedProject?.id,
-  ).length;
-  const issuedToolCount = state.projectTools.filter(
-    (item) =>
-      item.projectId === selectedProject?.id && item.status === "issued",
-  ).length;
-  const availableToolCount = state.projectTools.filter(
-    (item) =>
-      item.projectId === selectedProject?.id && item.status === "available",
-  ).length;
-  const toolAttentionCount = state.projectTools.filter(
-    (item) =>
-      item.projectId === selectedProject?.id &&
-      (item.status === "maintenance" ||
-        item.status === "lost" ||
-        (item.status === "issued" &&
-          !!item.expectedReturnDate &&
-          item.expectedReturnDate < today)),
-  ).length;
-  const draftChecklistCount = state.projectChecklists.filter(
-    (item) => item.projectId === selectedProject?.id && item.status === "draft",
-  ).length;
-  const pendingChangeOrderCount = state.changeOrders.filter(
-    (item) =>
-      item.projectId === selectedProject?.id &&
-      item.status === "pending_client",
   ).length;
   const projectBudget = state.projectBudgets.find(
     (item) => item.projectId === selectedProject?.id,
@@ -272,69 +221,17 @@ export function TodayScreen({ navigation }: { navigation: any }) {
       today,
     ],
   );
-  const dayClosure = useMemo(
-    () =>
-      selectedProject
-        ? summarizeDayClosure(state, selectedProject.id, today)
-        : undefined,
-    [selectedProject?.id, state, today],
-  );
-  const closureStatus = useMemo(
-    () =>
-      selectedProject
-        ? getDayClosureStatus(state, selectedProject.id, today)
-        : undefined,
-    [selectedProject?.id, state, today],
-  );
-  useEffect(() => {
-    if (!selectedProject) return;
-    void syncDayClosureReminder({
-      projectId: selectedProject.id,
-      projectName: selectedProject.name,
-      logDate: today,
-      isClosed: Boolean(closureStatus?.latest) && !closureStatus?.canConfirm,
-    }).catch(() => undefined);
-  }, [
-    closureStatus?.canConfirm,
-    closureStatus?.latest?.id,
-    selectedProject?.id,
-    selectedProject?.name,
-    today,
-  ]);
-  const openClosureConfirmation = () => {
-    const newestUnsealedEntry = entries.find((entry) =>
-      closureStatus?.unsealedEntryIds.includes(entry.id),
-    );
-    setClosureConfirmed(false);
-    setCorrectionReason(newestUnsealedEntry?.correctionReason ?? "");
-    setClosureError("");
-    setClosureOpen(true);
-  };
-  const closeDay = async () => {
-    setClosureError("");
-    setClosingDay(true);
-    try {
-      await confirmDayClosure({
-        logDate: today,
-        confirmed: closureConfirmed,
-        correctionReason,
-      });
-      setClosureOpen(false);
-    } catch (error) {
-      const code = error instanceof Error ? error.message : "";
-      setClosureError(
-        code === "CONFIRMATION_REQUIRED"
-          ? t("dayClosure.confirmationRequired")
-          : code === "CORRECTION_REASON_REQUIRED"
-            ? t("dayClosure.correctionReasonRequired")
-            : code === "DIARY_REQUIRED"
-              ? t("dayClosure.diaryRequired")
-              : t("errors.generic"),
-      );
-    } finally {
-      setClosingDay(false);
-    }
-  };
+  const visibleControlActionCount = controlTower.actions.filter(
+    (item) =>
+      ![
+        "financial",
+        "schedule",
+        "tools",
+        "task_tools",
+        "checklists",
+        "change_orders",
+      ].includes(item.target),
+  ).length;
   useEffect(() => {
     void refreshProjectData();
     void refreshGallery().catch(() => undefined);
@@ -437,7 +334,7 @@ export function TodayScreen({ navigation }: { navigation: any }) {
             ]}
           >
             <Text style={styles.towerCountText}>
-              {controlTower.actionCount}
+              {visibleControlActionCount}
             </Text>
           </View>
           <ChevronRight color={colors.surface} size={22} />
@@ -464,113 +361,13 @@ export function TodayScreen({ navigation }: { navigation: any }) {
           ))}
         </View>
         <Text style={styles.towerHint}>
-          {controlTower.actionCount
+          {visibleControlActionCount
             ? t("controlTower.dashboardActions", {
-                count: controlTower.actionCount,
+                count: visibleControlActionCount,
               })
             : t("controlTower.dashboardClear")}
         </Text>
       </Pressable>
-      {dayClosure ? (
-        <Card style={styles.closureCard}>
-          <View style={styles.closureHeader}>
-            <View style={styles.closureIcon}>
-              <ClipboardCheck color={colors.primaryDark} size={27} />
-            </View>
-            <View style={styles.flex}>
-              <Text style={styles.sectionTitle}>{t("dayClosure.title")}</Text>
-              <Text style={styles.meta}>
-                {closureStatus?.latest && !closureStatus.canConfirm
-                  ? t("dayClosure.sealedAt", {
-                      time: formatTime(closureStatus.latest.confirmedAt),
-                      version: closureStatus.latest.version,
-                    })
-                  : closureStatus?.latest
-                    ? t("dayClosure.correctionPending")
-                    : dayClosure.ready
-                      ? t("dayClosure.ready")
-                      : t("dayClosure.needsAttention")}
-              </Text>
-            </View>
-            {closureStatus?.latest && !closureStatus.canConfirm ? (
-              <View style={styles.sealMark}>
-                <LockKeyhole color={colors.primaryDark} size={18} />
-                <Text style={styles.sealVersion}>
-                  v{closureStatus.latest.version}
-                </Text>
-              </View>
-            ) : (
-              <Text style={styles.closureScore}>
-                {dayClosure.completedCount}/{dayClosure.totalCount}
-              </Text>
-            )}
-          </View>
-          <View style={styles.closureChecks}>
-            {dayClosure.checks.map((check) => (
-              <View style={styles.closureRow} key={check.key}>
-                {check.complete ? (
-                  <CheckCircle2 color={colors.primary} size={19} />
-                ) : (
-                  <AlertTriangle color={colors.warning} size={19} />
-                )}
-                <Text style={styles.closureLabel}>
-                  {t(`dayClosure.checks.${check.key}`)}
-                </Text>
-                <Text
-                  style={[
-                    styles.closureStatus,
-                    !check.complete && styles.closureStatusWarning,
-                  ]}
-                >
-                  {t(
-                    check.complete
-                      ? "dayClosure.complete"
-                      : "dayClosure.attention",
-                  )}
-                </Text>
-              </View>
-            ))}
-          </View>
-          <PrimaryButton
-            title={
-              closureStatus?.latest && !closureStatus.canConfirm
-                ? t("dayClosure.correction")
-                : closureStatus?.latest
-                  ? t("dayClosure.confirmCorrection")
-                  : entries.length
-                    ? t("dayClosure.closeDay")
-                    : t("dayClosure.draft")
-            }
-            icon={
-              closureStatus?.latest && !closureStatus.canConfirm
-                ? FilePenLine
-                : LockKeyhole
-            }
-            onPress={() => {
-              const latest = entries[0];
-              if (closureStatus?.latest && !closureStatus.canConfirm) {
-                navigation.navigate("Diary", {
-                  correctionOfId: latest?.id,
-                  draft: dayClosure.draft,
-                });
-                return;
-              }
-              if (entries.length) {
-                openClosureConfirmation();
-                return;
-              }
-              navigation.navigate("DiaryDraftReview");
-            }}
-          />
-          <Text style={styles.closureConfirmation}>
-            {closureStatus?.latest && !closureStatus.canConfirm
-              ? t("dayClosure.sealedHint", {
-                  hash: closureStatus.latest.contentHash.slice(0, 12),
-                })
-              : t("dayClosure.confirmation")}
-          </Text>
-        </Card>
-      ) : null}
       <Card>
         <Text style={styles.sectionTitle}>{t("dashboard.weatherTitle")}</Text>
         <View style={styles.weatherRow}>
@@ -658,135 +455,6 @@ export function TodayScreen({ navigation }: { navigation: any }) {
           }
         />
       </Card>
-      <Card style={styles.checklistsCard}>
-        <View style={styles.galleryRow}>
-          <View style={styles.galleryIcon}>
-            <ShieldCheck color={colors.primary} size={30} />
-          </View>
-          <View style={styles.flex}>
-            <Text style={styles.sectionTitle}>{t("checklists.title")}</Text>
-            <Text style={styles.meta}>
-              {t("checklists.history")}: {checklistCount} ·{" "}
-              {t("checklists.status.draft")}: {draftChecklistCount}
-            </Text>
-          </View>
-        </View>
-        <SecondaryButton
-          title={t("checklists.title")}
-          icon={ShieldCheck}
-          onPress={() => navigation.navigate("Checklists")}
-        />
-      </Card>
-      <Card style={styles.changeOrdersCard}>
-        <View style={styles.galleryRow}>
-          <View style={styles.changeOrderIcon}>
-            <FilePenLine color={colors.primaryDark} size={30} />
-          </View>
-          <View style={styles.flex}>
-            <Text style={styles.sectionTitle}>{t("changeOrders.title")}</Text>
-            <Text style={styles.meta}>
-              {t("changeOrders.status.pending_client")}:{" "}
-              {pendingChangeOrderCount}
-            </Text>
-          </View>
-        </View>
-        <SecondaryButton
-          title={t("changeOrders.title")}
-          icon={FilePenLine}
-          onPress={() => navigation.navigate("ChangeOrders")}
-        />
-      </Card>
-      <Card style={styles.financialCard}>
-        <View style={styles.galleryRow}>
-          <View style={styles.financialIcon}>
-            <CircleGauge
-              color={
-                financialSummary.health === "over"
-                  ? colors.danger
-                  : financialSummary.health === "watch"
-                    ? colors.warning
-                    : colors.primaryDark
-              }
-              size={30}
-            />
-          </View>
-          <View style={styles.flex}>
-            <Text style={styles.sectionTitle}>{t("financial.title")}</Text>
-            <Text style={styles.meta}>
-              {projectBudget
-                ? costForecast.forecastFinalCostCents !== undefined
-                  ? `${t("financial.finalCostForecast")}: ${formatEuroAmount(
-                      costForecast.forecastFinalCostCents,
-                    )}`
-                  : t("financial.forecastUnavailable")
-                : t("financial.setupTitle")}
-            </Text>
-            {costForecast.projectedVarianceCents !== undefined ? (
-              <Text
-                style={[
-                  styles.financialSignal,
-                  costForecast.projectedVarianceCents > 0
-                    ? styles.financialSignalDanger
-                    : styles.financialSignalSafe,
-                ]}
-              >
-                {costForecast.projectedVarianceCents > 0
-                  ? t("financial.todayOverrun", {
-                      amount: formatEuroAmount(
-                        costForecast.projectedVarianceCents,
-                      ),
-                    })
-                  : t("financial.todayWithin", {
-                      amount: formatEuroAmount(
-                        Math.abs(costForecast.projectedVarianceCents),
-                      ),
-                    })}
-              </Text>
-            ) : null}
-          </View>
-        </View>
-        <SecondaryButton
-          title={t("financial.open")}
-          icon={CircleGauge}
-          onPress={() => navigation.navigate("FinancialControl")}
-        />
-      </Card>
-      <Card style={styles.scheduleCard}>
-        <View style={styles.galleryRow}>
-          <View style={styles.scheduleIcon}>
-            <CalendarClock
-              color={
-                scheduleSummary.risk === "critical"
-                  ? colors.danger
-                  : scheduleSummary.risk === "high" ||
-                      scheduleSummary.risk === "watch"
-                    ? colors.warning
-                    : colors.primaryDark
-              }
-              size={30}
-            />
-          </View>
-          <View style={styles.flex}>
-            <Text style={styles.sectionTitle}>
-              {t("scheduleForecast.title")}
-            </Text>
-            <Text style={styles.meta}>
-              {projectSchedule
-                ? `${t("scheduleForecast.overdue")}: ${
-                    scheduleSummary.overdueTaskCount
-                  } · ${t("scheduleForecast.blocked")}: ${
-                    scheduleSummary.blockedTaskCount
-                  }`
-                : t("scheduleForecast.setupTitle")}
-            </Text>
-          </View>
-        </View>
-        <SecondaryButton
-          title={t("scheduleForecast.open")}
-          icon={CalendarClock}
-          onPress={() => navigation.navigate("ScheduleForecast")}
-        />
-      </Card>
       <Card style={styles.weeklyCard}>
         <View style={styles.galleryRow}>
           <View style={styles.weeklyIcon}>
@@ -835,28 +503,6 @@ export function TodayScreen({ navigation }: { navigation: any }) {
           title={t("dashboard.openCheckin")}
           icon={QrCode}
           onPress={() => navigation.navigate("Checkin")}
-        />
-      </Card>
-      <Card style={styles.toolsCard}>
-        <View style={styles.galleryRow}>
-          <View style={styles.toolsIcon}>
-            <Hammer color="#E46F2E" size={30} />
-          </View>
-          <View style={styles.flex}>
-            <Text style={styles.sectionTitle}>{t("tools.title")}</Text>
-            <Text style={styles.meta}>
-              {t("tools.metricAvailable")}: {availableToolCount}
-              {" · "}
-              {t("tools.metricIssued")}: {issuedToolCount}
-              {" · "}
-              {t("tools.metricAttention")}: {toolAttentionCount}
-            </Text>
-          </View>
-        </View>
-        <SecondaryButton
-          title={t("tools.title")}
-          icon={Hammer}
-          onPress={() => navigation.navigate("Tools")}
         />
       </Card>
       <Card>
@@ -925,138 +571,6 @@ export function TodayScreen({ navigation }: { navigation: any }) {
         title={t("reports.title")}
         onPress={() => navigation.navigate("Reports")}
       />
-      <Modal
-        animationType="fade"
-        onRequestClose={() => setClosureOpen(false)}
-        transparent
-        visible={closureOpen}
-      >
-        <View style={styles.modalBackdrop}>
-          <ScrollView
-            accessibilityViewIsModal
-            contentContainerStyle={styles.closureSheetContent}
-            style={styles.closureSheet}
-          >
-            <View style={styles.sheetHeader}>
-              <View style={styles.sheetSeal}>
-                <LockKeyhole color={colors.primaryDark} size={25} />
-              </View>
-              <View style={styles.flex}>
-                <Text style={styles.sheetEyebrow}>
-                  {closureStatus?.latest
-                    ? t("dayClosure.version", {
-                        version: closureStatus.latest.version + 1,
-                      })
-                    : t("dayClosure.firstClosure")}
-                </Text>
-                <Text style={styles.sheetTitle}>
-                  {closureStatus?.latest
-                    ? t("dayClosure.confirmCorrection")
-                    : t("dayClosure.closeDay")}
-                </Text>
-              </View>
-              <IconButton
-                icon={X}
-                label={t("app.close")}
-                onPress={() => setClosureOpen(false)}
-              />
-            </View>
-            <Text style={styles.sheetLead}>{t("dayClosure.legalHint")}</Text>
-            <View style={styles.snapshotRow}>
-              <Text style={styles.snapshotNumber}>{entries.length}</Text>
-              <Text style={styles.snapshotLabel}>
-                {t("dayClosure.snapshotEntries")}
-              </Text>
-              <View style={styles.snapshotDivider} />
-              <Text style={styles.snapshotNumber}>
-                {dayClosure?.checks.filter((check) => !check.complete).length ??
-                  0}
-              </Text>
-              <Text style={styles.snapshotLabel}>
-                {t("dayClosure.snapshotWarnings")}
-              </Text>
-            </View>
-            {dayClosure?.checks.some((check) => !check.complete) ? (
-              <View style={styles.warningLedger}>
-                <Text style={styles.warningLedgerTitle}>
-                  {t("dayClosure.acknowledgedWarnings")}
-                </Text>
-                {dayClosure.checks
-                  .filter((check) => !check.complete)
-                  .map((check) => (
-                    <View key={check.key} style={styles.warningLedgerRow}>
-                      <AlertTriangle color={colors.warning} size={16} />
-                      <Text style={styles.warningLedgerText}>
-                        {t(`dayClosure.checks.${check.key}`)}
-                      </Text>
-                    </View>
-                  ))}
-              </View>
-            ) : null}
-            {closureStatus?.latest ? (
-              <TextArea
-                error={
-                  closureError === t("dayClosure.correctionReasonRequired")
-                    ? closureError
-                    : undefined
-                }
-                label={t("dayClosure.correctionReason")}
-                maxLength={300}
-                onChangeText={setCorrectionReason}
-                placeholder={t("dayClosure.correctionReasonPlaceholder")}
-                value={correctionReason}
-              />
-            ) : null}
-            <Pressable
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: closureConfirmed }}
-              onPress={() => setClosureConfirmed((value) => !value)}
-              style={[
-                styles.confirmationBox,
-                closureConfirmed && styles.confirmationBoxChecked,
-              ]}
-            >
-              <View
-                style={[
-                  styles.checkbox,
-                  closureConfirmed && styles.checkboxChecked,
-                ]}
-              >
-                {closureConfirmed ? (
-                  <CheckCircle2 color={colors.surface} size={18} />
-                ) : null}
-              </View>
-              <Text style={styles.confirmationText}>
-                {t("dayClosure.confirmationStatement")}
-              </Text>
-            </Pressable>
-            {closureError &&
-            closureError !== t("dayClosure.correctionReasonRequired") ? (
-              <Text style={styles.closureError}>{closureError}</Text>
-            ) : null}
-            <PrimaryButton
-              disabled={
-                closingDay ||
-                !closureConfirmed ||
-                (Boolean(closureStatus?.latest) &&
-                  correctionReason.trim().length < 3)
-              }
-              icon={ShieldCheck}
-              onPress={() => void closeDay()}
-              title={
-                closingDay
-                  ? t("app.loading")
-                  : closureStatus?.latest
-                    ? t("dayClosure.confirmCorrectionAction")
-                    : t("dayClosure.confirmCloseAction")
-              }
-            />
-            <Text style={styles.immutableHint}>
-              {t("dayClosure.immutableHint")}
-            </Text>
-          </ScrollView>
-        </View>
-      </Modal>
     </ScreenShell>
   );
 }

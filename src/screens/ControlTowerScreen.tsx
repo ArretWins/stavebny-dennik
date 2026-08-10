@@ -53,6 +53,15 @@ const severitySoft: Record<ControlTowerSeverity, string> = {
   clear: colors.primarySoft,
 };
 
+const hiddenTargets = new Set<ControlTowerTarget>([
+  "financial",
+  "schedule",
+  "tools",
+  "task_tools",
+  "checklists",
+  "change_orders",
+]);
+
 function itemIcon(item: ControlTowerItem) {
   if (item.target === "financial") return CircleGauge;
   if (item.target === "schedule") return CalendarClock;
@@ -276,14 +285,15 @@ export function ControlTowerScreen({ navigation }: { navigation: any }) {
       </ScreenShell>
     );
 
+  const actions = tower.actions.filter((item) => !hiddenTargets.has(item.target));
+  const waiting = tower.waiting.filter((item) => !hiddenTargets.has(item.target));
+  const actionCount = actions.length;
   const openTarget = (target: ControlTowerTarget) => {
     if (target === "sync") {
       void syncNow();
       return;
     }
-    if (target === "financial") navigation.navigate("FinancialControl");
-    else if (target === "schedule") navigation.navigate("ScheduleForecast");
-    else if (target === "defects")
+    if (target === "defects")
       navigation.navigate("Tasks", { kind: "defect" });
     else if (target === "task_reviews") navigation.navigate("Tasks");
     else if (target === "material_requests")
@@ -292,7 +302,6 @@ export function ControlTowerScreen({ navigation }: { navigation: any }) {
       navigation.navigate("Workforce", { tab: "workers" });
     else if (target === "receipts") navigation.navigate("Receipts");
     else if (target === "rfis") navigation.navigate("RfiList");
-    else if (target === "tools") navigation.navigate("Tools");
     else if (target === "timesheet") navigation.navigate("Timesheet");
     else if (target === "safety_briefings")
       navigation.navigate("SafetyBriefings");
@@ -303,11 +312,8 @@ export function ControlTowerScreen({ navigation }: { navigation: any }) {
       navigation.navigate("MaterialDeliveries");
     else if (target === "material_stock") navigation.navigate("MaterialStock");
     else if (target === "task_materials") navigation.navigate("TaskMaterials");
-    else if (target === "task_tools") navigation.navigate("TaskTools");
     else if (target === "tomorrow_plan") navigation.navigate("TomorrowPlan");
     else if (target === "diary_approvals") navigation.navigate("DiaryApprovals");
-    else if (target === "checklists") navigation.navigate("Checklists");
-    else if (target === "change_orders") navigation.navigate("ChangeOrders");
   };
   return (
     <ScreenShell>
@@ -337,7 +343,7 @@ export function ControlTowerScreen({ navigation }: { navigation: any }) {
             </Text>
             <Text style={styles.heroHint}>
               {t(`controlTower.health.${tower.severity}.hint`, {
-                count: tower.actionCount,
+                count: actionCount,
               })}
             </Text>
           </View>
@@ -378,12 +384,6 @@ export function ControlTowerScreen({ navigation }: { navigation: any }) {
           ))}
         </View>
       </Card>
-      <PrimaryButton
-        title={t("dailyPlan.open")}
-        icon={ClipboardCheck}
-        onPress={() => navigation.navigate("DailyControlPlan")}
-      />
-
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>{t("controlTower.actNow")}</Text>
         <View
@@ -391,7 +391,7 @@ export function ControlTowerScreen({ navigation }: { navigation: any }) {
             styles.countBadge,
             {
               backgroundColor:
-                tower.actionCount > 0
+                actionCount > 0
                   ? severitySoft[tower.severity]
                   : colors.primarySoft,
             },
@@ -402,19 +402,19 @@ export function ControlTowerScreen({ navigation }: { navigation: any }) {
               styles.countText,
               {
                 color:
-                  tower.actionCount > 0
+                  actionCount > 0
                     ? severityColor[tower.severity]
                     : colors.primaryDark,
               },
             ]}
           >
-            {tower.actionCount}
+            {actionCount}
           </Text>
         </View>
       </View>
-      {tower.actions.length ? (
+      {actions.length ? (
         <View style={styles.issueList}>
-          {tower.actions.map((item) => (
+          {actions.map((item) => (
             <IssueRow
               item={item}
               key={item.id}
@@ -436,11 +436,11 @@ export function ControlTowerScreen({ navigation }: { navigation: any }) {
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>{t("controlTower.waiting")}</Text>
-        <Text style={styles.sectionMeta}>{tower.waitingCount}</Text>
+        <Text style={styles.sectionMeta}>{waiting.length}</Text>
       </View>
-      {tower.waiting.length ? (
+      {waiting.length ? (
         <View style={styles.issueList}>
-          {tower.waiting.map((item) => (
+          {waiting.map((item) => (
             <IssueRow
               item={item}
               key={item.id}
