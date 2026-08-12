@@ -1,17 +1,14 @@
-# Stavebný denník — v1.2.2
+# Stavebný denník — v1.2.3
 
-Authentication hotfix — 10 August 2026.
+Authentication feedback update — 12 August 2026.
 
 ## Fixed
 
-- Removed the insecure offline email login fallback.
-- Unknown emails and incorrect passwords are now rejected by Supabase.
-- Signed Android builds fail when production server configuration is missing.
-- Android CI resolves the public Supabase client key from the authenticated project.
-- Removed the green Control Tower card and its route from the application.
+- Registration failures no longer appear as a generic sign-in error.
+- Added clear messages for invalid email, weak password, existing account, unconfirmed email and rate limits.
+- Kept authentication fail-closed when production server configuration is unavailable.
 
 ## Verification
 
-- Authentication fails closed without Supabase configuration.
-- Application, Android and update-manifest versions are aligned.
-- TypeScript, translation, copy and navigation regression checks pass.
+- A real Supabase sign-up completed and sent a confirmation email; the temporary test account was removed.
+- TypeScript, translations, visible copy and authentication regression tests pass.

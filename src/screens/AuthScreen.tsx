@@ -5,6 +5,7 @@ import { ScreenShell, PrimaryButton, SecondaryButton, TextField, Card } from '@/
 import { colors, spacing } from '@/theme/tokens';
 import { t } from '@/i18n';
 import { useAuth } from '@/state/auth';
+import { authErrorTranslationKey } from '@/services/authError';
 
 export function AuthScreen() {
   const { signIn, signUp, resetPassword } = useAuth();
@@ -36,11 +37,7 @@ export function AuthScreen() {
       }
       else await signIn(email, password);
     } catch (submitError) {
-      setError(
-        submitError instanceof Error && submitError.message === 'AUTH_CONFIG_MISSING'
-          ? t('errors.config')
-          : t('errors.auth'),
-      );
+      setError(t(authErrorTranslationKey(submitError, mode)));
     }
     finally { setBusy(false); }
   };
