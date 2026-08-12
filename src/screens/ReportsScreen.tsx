@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Alert, StyleSheet, Text } from 'react-native';
 import {
-  CalendarRange,
   Eye,
   FileCheck2,
   FileText,
@@ -161,11 +160,6 @@ export function ReportsScreen({ navigation }: { navigation: any }) {
   return (
     <ScreenShell>
       <TopBar title={t('reports.title')} onBack={() => navigation.goBack()} />
-      <SecondaryButton
-        title={t('weeklyReport.open')}
-        icon={CalendarRange}
-        onPress={() => navigation.navigate('WeeklyReport')}
-      />
       <SecondaryButton
         title={t('clientShare.open')}
         icon={Eye}

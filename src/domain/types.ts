@@ -47,7 +47,7 @@ export interface GpsEvidence {
 
 export interface WeatherSnapshot {
   id?: string;
-  provider: "open-meteo";
+  provider: "open-meteo" | "manual";
   requestUrl: string;
   latitude: number;
   longitude: number;
@@ -57,6 +57,7 @@ export interface WeatherSnapshot {
   precipitationMm?: number;
   windSpeedKmh?: number;
   weatherCode?: number;
+  manualDescription?: string;
   status: WeatherStatus;
 }
 

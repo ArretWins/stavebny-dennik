@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Alert, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { CalendarDays, CheckCircle2 } from "lucide-react-native";
+import { CalendarDays, CheckCircle2, CloudSun } from "lucide-react-native";
 import {
   ScreenShell,
   TopBar,
   Card,
   TextArea,
+  TextField,
   CounterInput,
   DashedUploadBox,
   EvidenceStrip,
@@ -24,6 +25,7 @@ import type {
   WeatherSnapshot,
 } from "@/domain/types";
 import { captureGps, fetchWeather } from "@/services/evidence";
+import { manualWeatherSnapshot } from "@/domain/weather";
 import { pickPhoto, type PhotoSource } from "@/services/attachments";
 import { useApp } from "@/state/app";
 import { useAuth } from "@/state/auth";
@@ -98,6 +100,21 @@ export function DiaryScreen({
   );
   const [weather, setWeather] = useState<WeatherSnapshot | undefined>(
     existing?.evidence.weather,
+  );
+  const [manualWeatherOpen, setManualWeatherOpen] = useState(
+    existing?.evidence.weather?.provider === "manual",
+  );
+  const [manualTemperature, setManualTemperature] = useState(
+    existing?.evidence.weather?.temperatureC?.toString() ?? "",
+  );
+  const [manualDescription, setManualDescription] = useState(
+    existing?.evidence.weather?.manualDescription ?? "",
+  );
+  const [manualWind, setManualWind] = useState(
+    existing?.evidence.weather?.windSpeedKmh?.toString() ?? "",
+  );
+  const [manualPrecipitation, setManualPrecipitation] = useState(
+    existing?.evidence.weather?.precipitationMm?.toString() ?? "",
   );
   const [attachment, setAttachment] = useState<Attachment | undefined>(
     existingAttachment,
@@ -175,6 +192,38 @@ export function DiaryScreen({
       { text: t("attachments.camera"), onPress: () => void addPhoto("camera") },
       { text: t("app.cancel"), style: "cancel" },
     ]);
+  const saveManualWeather = () => {
+    const temperatureC = Number(manualTemperature.replace(",", "."));
+    const windSpeedKmh = manualWind.trim()
+      ? Number(manualWind.replace(",", "."))
+      : undefined;
+    const precipitationMm = manualPrecipitation.trim()
+      ? Number(manualPrecipitation.replace(",", "."))
+      : undefined;
+    if (
+      !Number.isFinite(temperatureC) ||
+      temperatureC < -60 ||
+      temperatureC > 60 ||
+      (windSpeedKmh !== undefined && (!Number.isFinite(windSpeedKmh) || windSpeedKmh < 0 || windSpeedKmh > 250)) ||
+      (precipitationMm !== undefined && (!Number.isFinite(precipitationMm) || precipitationMm < 0 || precipitationMm > 500))
+    ) {
+      setError(t("diary.manualWeatherInvalid"));
+      return;
+    }
+    setWeather(
+      manualWeatherSnapshot({
+        temperatureC,
+        description: manualDescription,
+        windSpeedKmh,
+        precipitationMm,
+        latitude: gps?.latitude,
+        longitude: gps?.longitude,
+        capturedAt,
+      }),
+    );
+    setError("");
+    setManualWeatherOpen(false);
+  };
   const save = async () => {
     const errors = validateDiaryInput({
       workDescription: work,
@@ -336,6 +385,53 @@ export function DiaryScreen({
         workerCount={workers}
         onChange={setLegalDetails}
       />
+      <Card style={styles.weatherCard}>
+        <View style={styles.weatherHeader}>
+          <CloudSun color={colors.primary} size={26} />
+          <View style={styles.weatherHeaderText}>
+            <Text style={styles.weatherTitle}>{t("diary.manualWeatherTitle")}</Text>
+            <Text style={styles.weatherHint}>{t("diary.manualWeatherHint")}</Text>
+          </View>
+        </View>
+        {manualWeatherOpen ? (
+          <View style={styles.manualWeatherFields}>
+            <TextField
+              label={t("diary.temperature")}
+              value={manualTemperature}
+              onChangeText={setManualTemperature}
+              keyboardType="decimal-pad"
+              placeholder="18"
+            />
+            <TextField
+              label={t("diary.weatherDescription")}
+              value={manualDescription}
+              onChangeText={setManualDescription}
+              placeholder={t("diary.weatherDescriptionPlaceholder")}
+              maxLength={80}
+            />
+            <TextField
+              label={t("diary.windSpeed")}
+              value={manualWind}
+              onChangeText={setManualWind}
+              keyboardType="decimal-pad"
+              placeholder="12"
+            />
+            <TextField
+              label={t("diary.precipitation")}
+              value={manualPrecipitation}
+              onChangeText={setManualPrecipitation}
+              keyboardType="decimal-pad"
+              placeholder="0"
+            />
+            <PrimaryButton title={t("diary.useManualWeather")} onPress={saveManualWeather} />
+          </View>
+        ) : (
+          <PrimaryButton
+            title={t("diary.enterWeatherManually")}
+            onPress={() => setManualWeatherOpen(true)}
+          />
+        )}
+      </Card>
       <TextArea
         label={t("diary.note")}
         value={note}
@@ -399,4 +495,14 @@ const styles = StyleSheet.create({
   warning: { color: colors.warning, fontSize: 12 },
   error: { color: colors.danger, fontSize: 13 },
   thumbnail: { height: 160, width: "100%", borderRadius: 12 },
+  weatherCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: "#2B6F95",
+    backgroundColor: "#F7FBFD",
+  },
+  weatherHeader: { flexDirection: "row", alignItems: "center", gap: spacing.md },
+  weatherHeaderText: { flex: 1, gap: 3 },
+  weatherTitle: { color: colors.text, fontSize: 15, fontWeight: "800" },
+  weatherHint: { color: colors.textMuted, fontSize: 12, lineHeight: 17 },
+  manualWeatherFields: { gap: spacing.md },
 });

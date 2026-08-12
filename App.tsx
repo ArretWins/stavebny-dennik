@@ -34,12 +34,6 @@ import { PilotAccountScreen } from "@/screens/PilotAccountScreen";
 import { GalleryScreen } from "@/screens/GalleryScreen";
 import { SupportScreen } from "@/screens/SupportScreen";
 import { PrivacyScreen } from "@/screens/PrivacyScreen";
-import { PlansScreen } from "@/screens/PlansScreen";
-import { PlanBoardScreen } from "@/screens/PlanBoardScreen";
-import { TasksScreen } from "@/screens/TasksScreen";
-import { TaskEditorScreen } from "@/screens/TaskEditorScreen";
-import { TaskEvidenceReportScreen } from "@/screens/TaskEvidenceReportScreen";
-import { WeeklyReportScreen } from "@/screens/WeeklyReportScreen";
 import { MaterialProcurementScreen } from "@/screens/MaterialProcurementScreen";
 import { SyncCenterScreen } from "@/screens/SyncCenterScreen";
 import { RfiListScreen } from "@/screens/RfiListScreen";
@@ -55,10 +49,7 @@ import { MaterialDeliveriesScreen } from "@/screens/MaterialDeliveriesScreen";
 import { MaterialDeliveryEditorScreen } from "@/screens/MaterialDeliveryEditorScreen";
 import { MaterialStockScreen } from "@/screens/MaterialStockScreen";
 import { MaterialStockMovementScreen } from "@/screens/MaterialStockMovementScreen";
-import { TaskMaterialsScreen } from "@/screens/TaskMaterialsScreen";
-import { TomorrowPlanScreen } from "@/screens/TomorrowPlanScreen";
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
-import type { SiteTaskKind } from "@/domain/types";
 
 export type RootStackParamList = {
   Auth: undefined;
@@ -95,21 +86,6 @@ export type RootStackParamList = {
   Gallery: undefined;
   Support: undefined;
   Privacy: undefined;
-  Plans: undefined;
-  PlanBoard: { planId: string };
-  Tasks: { kind?: SiteTaskKind } | undefined;
-  TaskEditor:
-    | {
-        taskId?: string;
-        defaultKind?: SiteTaskKind;
-        planId?: string;
-        pageNumber?: number;
-        xRatio?: number;
-        yRatio?: number;
-      }
-    | undefined;
-  TaskEvidenceReport: { taskId: string };
-  WeeklyReport: undefined;
   SyncCenter: undefined;
   RfiList: undefined;
   RfiEditor: {
@@ -131,8 +107,6 @@ export type RootStackParamList = {
     { requestId?: string; deliveryId?: string } | undefined;
   MaterialStock: undefined;
   MaterialStockMovement: { requestItemId?: string } | undefined;
-  TaskMaterials: { taskId?: string } | undefined;
-  TomorrowPlan: undefined;
 };
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const navigationRef = createNavigationContainerRef<RootStackParamList>();
@@ -259,15 +233,6 @@ function Navigation() {
             <Stack.Screen name="Gallery" component={GalleryScreen} />
             <Stack.Screen name="Support" component={SupportScreen} />
             <Stack.Screen name="Privacy" component={PrivacyScreen} />
-            <Stack.Screen name="Plans" component={PlansScreen} />
-            <Stack.Screen name="PlanBoard" component={PlanBoardScreen} />
-            <Stack.Screen name="Tasks" component={TasksScreen} />
-            <Stack.Screen name="TaskEditor" component={TaskEditorScreen} />
-            <Stack.Screen
-              name="TaskEvidenceReport"
-              component={TaskEvidenceReportScreen}
-            />
-            <Stack.Screen name="WeeklyReport" component={WeeklyReportScreen} />
             <Stack.Screen name="SyncCenter" component={SyncCenterScreen} />
             <Stack.Screen name="RfiList" component={RfiListScreen} />
             <Stack.Screen name="RfiEditor" component={RfiEditorScreen} />
@@ -312,11 +277,6 @@ function Navigation() {
               name="MaterialStockMovement"
               component={MaterialStockMovementScreen}
             />
-            <Stack.Screen
-              name="TaskMaterials"
-              component={TaskMaterialsScreen}
-            />
-            <Stack.Screen name="TomorrowPlan" component={TomorrowPlanScreen} />
             <Stack.Screen
               name="PublicCheckin"
               component={PublicCheckinScreen}

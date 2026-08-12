@@ -14,6 +14,14 @@ describe("simplified application navigation", () => {
       "DailyControlPlan",
       "Tools",
       "ControlTower",
+      "Plans",
+      "PlanBoard",
+      "Tasks",
+      "TaskEditor",
+      "TaskEvidenceReport",
+      "TaskMaterials",
+      "TomorrowPlan",
+      "WeeklyReport",
     ]) {
       expect(app).not.toContain('<Stack.Screen name="' + route + '"');
       expect(today).not.toContain('navigation.navigate("' + route + '")');

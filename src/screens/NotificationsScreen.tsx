@@ -58,14 +58,6 @@ export function NotificationsScreen({ navigation }: { navigation: any }) {
                   navigation.navigate("MaterialProcurement", {
                     requestId: String(item.data.requestId),
                   });
-                else if (
-                  (item.type === "task_comment" ||
-                    item.type === "client_decision") &&
-                  item.data?.taskId
-                )
-                  navigation.navigate("TaskEditor", {
-                    taskId: String(item.data.taskId),
-                  });
                 else if (item.type === "site_incident")
                   navigation.navigate("SiteIncidents");
                 else if (item.type === "material_delivery")

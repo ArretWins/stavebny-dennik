@@ -1,14 +1,15 @@
-# Stavebný denník — v1.2.3
+# Stavebný denník — v1.2.4
 
-Authentication feedback update — 12 August 2026.
+Simplified diary update — 12 August 2026.
 
-## Fixed
+## Changed
 
-- Registration failures no longer appear as a generic sign-in error.
-- Added clear messages for invalid email, weak password, existing account, unconfirmed email and rate limits.
-- Kept authentication fail-closed when production server configuration is unavailable.
+- Removed plans, tasks, defect tasks, tomorrow planning and their navigation.
+- Removed the weekly report from the dashboard and reports section.
+- Added manual site-weather entry to the diary: temperature, observed conditions, wind and precipitation.
+- Manual weather is saved as evidence, synchronized and displayed on the dashboard.
 
 ## Verification
 
-- A real Supabase sign-up completed and sent a confirmation email; the temporary test account was removed.
-- TypeScript, translations, visible copy and authentication regression tests pass.
+- TypeScript, translations and visible-copy checks pass.
+- 85 test files and 284 tests pass.

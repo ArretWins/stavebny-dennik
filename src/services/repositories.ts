@@ -23,6 +23,11 @@ function projectFromRow(row: Record<string, unknown>): Project {
 }
 
 function diaryFromRow(row: Record<string, any>): DiaryEntry {
+  const evidence = row.evidence_json as DiaryEntry["evidence"];
+  if (evidence?.weather?.provider === "manual" && !evidence.weather.manualDescription) {
+    const description = evidence.weather.rawJson?.description;
+    if (typeof description === "string") evidence.weather.manualDescription = description;
+  }
   return {
     id: String(row.id),
     ownerId: String(row.owner_id),
@@ -41,7 +46,7 @@ function diaryFromRow(row: Record<string, any>): DiaryEntry {
       ? row.technical_records_json
       : [],
     note: row.note ? String(row.note) : undefined,
-    evidence: row.evidence_json,
+    evidence,
     lockedAt: row.locked_at ? String(row.locked_at) : undefined,
     lockedBy: row.locked_by ? String(row.locked_by) : undefined,
     correctionOfId: row.correction_of_id

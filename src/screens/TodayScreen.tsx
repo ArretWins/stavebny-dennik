@@ -15,11 +15,7 @@ import {
   QrCode,
   ReceiptText,
   Images,
-  MapPinned,
   Users,
-  AlertTriangle,
-  CalendarClock,
-  CalendarRange,
 } from "lucide-react-native";
 import {
   ScreenShell,
@@ -35,7 +31,7 @@ import {
 import { colors, spacing } from "@/theme/tokens";
 import { formatTime } from "@/i18n/format";
 import { t } from "@/i18n";
-import { weatherLabel } from "@/domain/weather";
+import { weatherSnapshotLabel } from "@/domain/weather";
 import { localDateIso } from "@/domain/ids";
 import { useApp } from "@/state/app";
 
@@ -66,24 +62,6 @@ export function TodayScreen({ navigation }: { navigation: any }) {
   const photoCount = state.attachments.filter(
     (item) => item.projectId === selectedProject?.id,
   ).length;
-  const planCount = state.projectPlans.filter(
-    (item) => item.projectId === selectedProject?.id,
-  ).length;
-  const openTaskCount = state.siteTasks.filter(
-    (item) => item.projectId === selectedProject?.id && item.status !== "done",
-  ).length;
-  const openDefectCount = state.siteTasks.filter(
-    (item) =>
-      item.projectId === selectedProject?.id &&
-      item.kind === "defect" &&
-      item.status !== "done",
-  ).length;
-  const reviewDefectCount = state.siteTasks.filter(
-    (item) =>
-      item.projectId === selectedProject?.id &&
-      item.kind === "defect" &&
-      item.status === "review",
-  ).length;
   useEffect(() => {
     void refreshProjectData();
     void refreshGallery().catch(() => undefined);
@@ -108,7 +86,7 @@ export function TodayScreen({ navigation }: { navigation: any }) {
     .find((snapshot) => snapshot?.status === "saved");
   const weatherSummary =
     savedWeather?.temperatureC !== undefined
-      ? `${savedWeather.temperatureC} °C · ${weatherLabel(savedWeather.weatherCode)}`
+      ? `${savedWeather.temperatureC} °C · ${weatherSnapshotLabel(savedWeather)}`
       : t("dashboard.weatherEmpty");
   return (
     <ScreenShell>
@@ -191,82 +169,6 @@ export function TodayScreen({ navigation }: { navigation: any }) {
           title={t("gallery.open")}
           icon={Images}
           onPress={() => navigation.navigate("Gallery")}
-        />
-      </Card>
-      <Card style={styles.planningCard}>
-        <View style={styles.galleryRow}>
-          <View style={styles.galleryIcon}>
-            <MapPinned color={colors.primary} size={30} />
-          </View>
-          <View style={styles.flex}>
-            <Text style={styles.sectionTitle}>{t("planning.title")}</Text>
-            <Text style={styles.meta}>
-              {t("planning.planCount", { count: planCount })} ·{" "}
-              {t("planning.taskCount", { count: openTaskCount })}
-            </Text>
-          </View>
-        </View>
-        <SecondaryButton
-          title={t("planning.open")}
-          icon={MapPinned}
-          onPress={() => navigation.navigate("Plans")}
-        />
-        <SecondaryButton
-          title={t("tomorrowPlan.open")}
-          icon={CalendarClock}
-          onPress={() => navigation.navigate("TomorrowPlan")}
-        />
-      </Card>
-      <Card style={styles.defectsCard}>
-        <View style={styles.galleryRow}>
-          <View style={styles.defectIcon}>
-            <AlertTriangle color={colors.warning} size={30} />
-          </View>
-          <View style={styles.flex}>
-            <Text style={styles.sectionTitle}>
-              {t("siteTasks.defectsTitle")}
-            </Text>
-            <Text style={styles.meta}>
-              {t("siteTasks.openDefects", { count: openDefectCount })} ·{" "}
-              {t("siteTasks.reviewDefects", { count: reviewDefectCount })}
-            </Text>
-          </View>
-        </View>
-        <SecondaryButton
-          title={t("siteTasks.defectsTitle")}
-          icon={AlertTriangle}
-          onPress={() => navigation.navigate("Tasks", { kind: "defect" })}
-        />
-        <WarningActionButton
-          title={t("siteTasks.addDefect")}
-          icon={Plus}
-          onPress={() =>
-            navigation.navigate("TaskEditor", { defaultKind: "defect" })
-          }
-        />
-      </Card>
-      <Card style={styles.weeklyCard}>
-        <View style={styles.galleryRow}>
-          <View style={styles.weeklyIcon}>
-            <CalendarRange color={colors.primaryDark} size={30} />
-          </View>
-          <View style={styles.flex}>
-            <Text style={styles.sectionTitle}>{t("weeklyReport.title")}</Text>
-            <Text style={styles.meta}>
-              {state.weeklyReports.some(
-                (item) =>
-                  item.projectId === selectedProject.id &&
-                  item.status === "draft",
-              )
-                ? t("weeklyReport.saved")
-                : t("weeklyReport.open")}
-            </Text>
-          </View>
-        </View>
-        <SecondaryButton
-          title={t("weeklyReport.open")}
-          icon={CalendarRange}
-          onPress={() => navigation.navigate("WeeklyReport")}
         />
       </Card>
       <Card>
@@ -465,13 +367,10 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   galleryCard: { borderTopWidth: 4, borderTopColor: colors.warning },
-  planningCard: { borderTopWidth: 4, borderTopColor: colors.primary },
-  defectsCard: { borderTopWidth: 4, borderTopColor: colors.warning },
   checklistsCard: { borderTopWidth: 4, borderTopColor: colors.primary },
   changeOrdersCard: { borderTopWidth: 4, borderTopColor: "#C8A96B" },
   financialCard: { borderTopWidth: 4, borderTopColor: colors.primaryDark },
   scheduleCard: { borderTopWidth: 4, borderTopColor: "#C8A96B" },
-  weeklyCard: { borderTopWidth: 4, borderTopColor: "#173F35" },
   toolsCard: { borderTopWidth: 4, borderTopColor: "#E46F2E" },
   galleryRow: { flexDirection: "row", alignItems: "center", gap: spacing.md },
   galleryIcon: {
@@ -479,14 +378,6 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 14,
     backgroundColor: colors.primarySoft,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  defectIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
-    backgroundColor: colors.warningSoft,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -518,14 +409,6 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 14,
     backgroundColor: "#F4ECD9",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  weeklyIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
-    backgroundColor: "#E7EEE9",
     alignItems: "center",
     justifyContent: "center",
   },

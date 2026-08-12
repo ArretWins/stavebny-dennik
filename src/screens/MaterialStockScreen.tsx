@@ -136,11 +136,6 @@ export function MaterialStockScreen({ navigation }: { navigation: any }) {
         icon={Plus}
         onPress={() => navigation.navigate("MaterialStockMovement")}
       />
-      <SecondaryButton
-        title={t("taskMaterials.open")}
-        icon={Boxes}
-        onPress={() => navigation.navigate("TaskMaterials")}
-      />
       {rejecting ? (
         <Card style={s.reject}>
           <Text style={s.sectionTitle}>{t("materialStock.rejectTitle")}</Text>

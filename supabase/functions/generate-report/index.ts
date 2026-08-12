@@ -67,7 +67,7 @@ function evidenceLines(row: DbRow): string[] {
     `Teplota: ${number(weather.temperatureC, "°C")}`,
     `Zrážky: ${number(weather.precipitationMm, "mm")}`,
     `Vietor: ${number(weather.windSpeedKmh, "km/h")}`,
-    `Zdroj počasia: ${weather.provider === "open-meteo" ? "Open-Meteo" : "—"}`,
+    `Zdroj počasia: ${weather.provider === "open-meteo" ? "Open-Meteo" : weather.provider === "manual" ? "Ručný zápis" : "—"}`,
   ];
   if (
     gps &&
