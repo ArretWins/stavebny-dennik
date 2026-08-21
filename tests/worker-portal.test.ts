@@ -65,6 +65,10 @@ describe("passwordless worker portal contract", () => {
     expect(proxy).toContain("'/download'");
     expect(proxy).toContain("url.pathname === '/worker'");
     expect(proxy).toContain("'/worker/'");
+    expect(proxy).toContain("legacyPublicHostname = 'stavebny-dennik-worker.pages.dev'");
+    expect(proxy).toContain("primaryPublicOrigin = 'https://stavuno.pages.dev'");
+    expect(proxy).toContain("`${url.pathname}${url.search}`");
+    expect(proxy).toContain("Response.redirect(destination, 308)");
   });
   it("creates material requests transactionally and only lists the current worker requests", () => {
     expect(source).toContain("rpc('create_material_request'");
@@ -211,7 +215,7 @@ describe("passwordless worker portal contract", () => {
     );
     expect(manager).toContain("setInterval");
     expect(manager).toContain("5_000");
-    expect(manager).toContain("https://stavebny-dennik-worker.pages.dev");
+    expect(manager).toContain("https://stavuno.pages.dev");
     expect(manager).toContain("/worker/?token=");
   });
   it("proxies private supplier RFQ pages without exposing service credentials", () => {

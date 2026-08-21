@@ -13,8 +13,9 @@ enabled = true
 enabled = false
 
 [auth]
-site_url = "https://stavebny-dennik-worker.pages.dev"
+site_url = "https://stavuno.pages.dev"
 additional_redirect_urls = [
+  "https://stavuno.pages.dev/**",
   "https://stavebny-dennik-worker.pages.dev/**",
   "stavebnydennik://**",
 ]

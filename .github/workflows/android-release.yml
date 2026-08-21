@@ -44,7 +44,7 @@ jobs:
           test "$anon_key" != "null"
           echo "EXPO_PUBLIC_SUPABASE_URL=$EXPO_PUBLIC_SUPABASE_URL" >> "$GITHUB_ENV"
           echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=$anon_key" >> "$GITHUB_ENV"
-          echo "EXPO_PUBLIC_WORKER_PORTAL_URL=https://stavebny-dennik-worker.pages.dev" >> "$GITHUB_ENV"
+          echo "EXPO_PUBLIC_WORKER_PORTAL_URL=https://stavuno.pages.dev" >> "$GITHUB_ENV"
       - name: Build signed APK and AAB
         working-directory: android
         env:

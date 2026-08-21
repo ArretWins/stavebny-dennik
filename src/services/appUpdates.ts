@@ -2,7 +2,7 @@ import Constants from "expo-constants";
 import { supportedCpuArchitectures } from "expo-device";
 
 export const APP_UPDATE_MANIFEST_URL =
-  "https://stavebny-dennik-worker.pages.dev/app-version.json";
+  "https://stavuno.pages.dev/app-version.json";
 
 export type AppUpdateManifest = {
   version: string;

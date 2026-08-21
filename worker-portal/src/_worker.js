@@ -2,6 +2,8 @@ const upstreamShareUrl =
   'https://fjhgeudmcrbjpnduwhtb.supabase.co/functions/v1/project-share';
 const upstreamSupplierQuoteUrl =
   'https://fjhgeudmcrbjpnduwhtb.supabase.co/functions/v1/supplier-quote';
+const legacyPublicHostname = 'stavebny-dennik-worker.pages.dev';
+const primaryPublicOrigin = 'https://stavuno.pages.dev';
 
 const htmlHeaders = {
   'Cache-Control': 'private, no-store, max-age=0',
@@ -81,6 +83,10 @@ async function proxyPrivatePage(request, upstreamUrl) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.hostname === legacyPublicHostname) {
+      const destination = new URL(`${url.pathname}${url.search}`, primaryPublicOrigin);
+      return Response.redirect(destination, 308);
+    }
     if (url.pathname === '/client-share')
       return proxyPrivatePage(request, upstreamShareUrl);
     if (url.pathname === '/supplier-quote')
