@@ -3,11 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-    <meta name="theme-color" content="#1557b0" />
-    <meta
-      name="description"
-      content="Stavebný denník pre majstrov a malé stavebné tímy. Denné záznamy, fotodokumentácia, účtenky a požiadavky na materiál v jednej aplikácii."
-    />
+    <meta name="theme-color" content="#0b1220" />
+    <meta name="description" content="Stavebný denník pre majstrov a malé stavebné tímy. Denné záznamy, fotodokumentácia, účtenky a požiadavky na materiál v jednej aplikácii." />
     <meta property="og:title" content="Stavebný denník" />
     <meta property="og:description" content="Poriadok na stavbe bez papierovania navyše." />
     <meta property="og:image" content="/assets/app-icon.png" />
@@ -16,96 +13,116 @@
     <title>Stavebný denník — aplikácia pre majstrov</title>
   </head>
   <body>
-    <nav class="site-nav" aria-label="Hlavná navigácia">
-      <a class="brand" href="/" aria-label="Stavebný denník — domov">
-        <img src="/assets/app-icon.png" alt="" width="44" height="44" />
-        <span>Stavebný denník</span>
-      </a>
-      <div class="nav-actions">
-        <a href="#funkcie">Funkcie</a>
-        <a class="worker-link" href="/worker">Vstup pre pracovníka</a>
-      </div>
-    </nav>
-
-    <main>
-      <section class="hero">
-        <div class="hero-copy">
-          <p class="kicker">PRE MAJSTROV · STAVBYVEDÚCICH · MALÉ TÍMY</p>
-          <h1>Stavba má svoj príbeh.<br /><span>Majte ho zdokumentovaný.</span></h1>
-          <p class="lead">
-            Denné záznamy, fotografie, účtenky a požiadavky pracovníkov na jednom mieste — priamo v mobile, aj keď ste na stavbe bez stabilného internetu.
-          </p>
-          <div class="hero-actions">
-            <a id="download-button" class="download-button is-loading" href="#download" aria-describedby="download-note">
-              <span class="android-mark" aria-hidden="true">↓</span>
-              <span><small>STIAHNUŤ PRE ANDROID</small><strong id="button-version">Načítavam verziu…</strong></span>
-            </a>
-            <a class="text-link" href="#ako-nainstalovat">Ako nainštalovať</a>
+    <div class="hero-shell">
+      <nav class="site-nav" data-i18n-aria="navAria" aria-label="Hlavná navigácia">
+        <a class="brand" href="/" data-i18n-aria="homeAria" aria-label="Stavebný denník — domov">
+          <img src="/assets/app-icon.png" alt="" width="42" height="42" />
+          <span>Stavebný denník</span>
+        </a>
+        <div class="nav-actions">
+          <a href="#funkcie" data-i18n="navFeatures">Funkcie</a>
+          <a class="worker-link" href="/worker" data-i18n="workerEntry">Vstup pre pracovníka</a>
+          <div class="language-switcher" data-i18n-aria="languageAria" aria-label="Jazyk stránky">
+            <button type="button" data-lang="sk" aria-pressed="true">SK</button>
+            <button type="button" data-lang="uk" aria-pressed="false">UA</button>
+            <button type="button" data-lang="ru" aria-pressed="false">RU</button>
           </div>
-          <p id="download-note" class="download-note">Bezplatná pilotná verzia · APK priamo od autora</p>
         </div>
+      </nav>
 
-        <aside class="site-sheet" aria-label="Ukážka denného záznamu">
-          <div class="sheet-head">
-            <span>DENNÝ ZÁZNAM</span><strong id="today-label">DNES</strong>
+      <main>
+        <section class="hero">
+          <div class="hero-copy">
+            <div class="availability"><span></span><b data-i18n="pilotBadge">Bezplatná pilotná verzia</b></div>
+            <p class="kicker" data-i18n="heroKicker">PRE MAJSTROV · STAVBYVEDÚCICH · MALÉ TÍMY</p>
+            <h1><span data-i18n="heroTitle1">Stavba pod kontrolou.</span><em data-i18n="heroTitle2">Dôkazy vždy poruke.</em></h1>
+            <p class="lead" data-i18n="heroLead">Denné záznamy, fotografie, účtenky a požiadavky pracovníkov na jednom mieste — priamo v mobile, aj bez stabilného internetu.</p>
+            <div class="hero-actions">
+              <a id="download-button" class="download-button is-loading" href="#download" aria-describedby="download-note">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 5-5m-5 5-5-5M5 21h14" /></svg>
+                <span><small data-i18n="downloadAndroid">STIAHNUŤ PRE ANDROID</small><strong id="button-version">Načítavam verziu…</strong></span>
+              </a>
+              <a class="text-link" href="#ako-nainstalovat"><span data-i18n="howInstall">Ako nainštalovať</span><b aria-hidden="true">↗</b></a>
+            </div>
+            <p id="download-note" class="download-note" data-i18n="downloadNote">Podpísaný APK · Android 7.0 alebo novší</p>
           </div>
-          <h2>Rekonštrukcia rodinného domu</h2>
-          <dl>
-            <div><dt>Počasie</dt><dd>18 °C · zamračené</dd></div>
-            <div><dt>Pracovníci</dt><dd>6 na objekte</dd></div>
-            <div><dt>Fotografie</dt><dd>12 priložených</dd></div>
-          </dl>
-          <div class="sheet-note"><span></span><p>Dokončená príprava podkladu. Materiál prevzatý a skontrolovaný.</p></div>
-          <div class="sheet-stamp">ULOŽENÉ<br /><b>OFFLINE</b></div>
-        </aside>
+
+          <div class="product-stage" aria-hidden="true">
+            <div class="stage-glow"></div>
+            <div class="floating-chip weather-chip"><span>☁</span><div><small data-i18n="mockWeather">POČASIE</small><b>18 °C</b></div></div>
+            <div class="floating-chip sync-chip"><span class="sync-dot"></span><div><small data-i18n="mockSync">SYNCHRONIZÁCIA</small><b data-i18n="mockSaved">Všetko uložené</b></div></div>
+            <div class="phone">
+              <div class="phone-bar"><span>9:41</span><i></i><span>● ●</span></div>
+              <div class="phone-app">
+                <div class="app-head"><div><small data-i18n="mockToday">DNES NA STAVBE</small><h2 data-i18n="mockProject">Rodinný dom</h2></div><img src="/assets/app-icon.png" alt="" /></div>
+                <div class="progress-card"><div><small data-i18n="mockDailyRecord">DENNÝ ZÁZNAM</small><b data-i18n="mockReady">Pripravený na doplnenie</b></div><span>→</span></div>
+                <div class="metric-grid">
+                  <div><span class="metric-icon blue">◎</span><b>6</b><small data-i18n="mockWorkers">pracovníkov</small></div>
+                  <div><span class="metric-icon mint">▧</span><b>12</b><small data-i18n="mockPhotos">fotografií</small></div>
+                </div>
+                <div class="activity-head"><b data-i18n="mockActivity">Aktivita objektu</b><small data-i18n="mockThisWeek">Tento týždeň</small></div>
+                <div class="activity-row"><span class="activity-icon receipt">▤</span><div><b data-i18n="mockReceipt">Účtenka pridaná</b><small>Stavebniny · 248,60 €</small></div><time>10:24</time></div>
+                <div class="activity-row"><span class="activity-icon photo">◇</span><div><b data-i18n="mockPhotoEvidence">Fotodokumentácia</b><small data-i18n="mockPhotoCount">4 nové fotografie</small></div><time>09:48</time></div>
+              </div>
+              <div class="phone-home"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <main class="content-main">
+      <section class="trust-strip" data-i18n-aria="trustAria" aria-label="Výhody">
+        <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 7v5c0 5 3.4 8 8 9 4.6-1 8-4 8-9V7l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="trustSecure">Dáta oddelené podľa projektu</span></div>
+        <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12a7 7 0 0 1 12-5l2 2M19 12a7 7 0 0 1-12 5l-2-2"/><path d="M19 4v5h-5M5 20v-5h5"/></svg><span data-i18n="trustOffline">Funguje aj offline</span></div>
+        <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg><span data-i18n="trustPdf">PDF pripravené na odovzdanie</span></div>
       </section>
 
       <section class="audience" aria-labelledby="audience-title">
-        <p class="section-label">PRE KOHO JE APLIKÁCIA</p>
-        <h2 id="audience-title">Pre ľudí, ktorí riadia stavbu v teréne, nie od pracovného stola.</h2>
+        <div class="section-heading">
+          <p class="section-label" data-i18n="audienceLabel">PRE KOHO JE APLIKÁCIA</p>
+          <h2 id="audience-title" data-i18n="audienceTitle">Pre tím, ktorý riadi stavbu priamo v teréne.</h2>
+          <p data-i18n="audienceLead">Každý vidí iba to, čo potrebuje. Majster riadi objekt, pracovník sa pripojí cez QR kód.</p>
+        </div>
         <div class="audience-grid">
-          <article><strong>Majster</strong><p>Zaznamená priebeh dňa, ľudí, počasie a fotografie priamo na objekte.</p></article>
-          <article><strong>Stavbyvedúci</strong><p>Má prehľad o dôkazoch, materiáloch, výdavkoch a stave jednotlivých objektov.</p></article>
-          <article><strong>Pracovník</strong><p>Pripojí sa cez QR kód a odošle majstrovi požiadavku na potrebný materiál.</p></article>
+          <article><span class="role-icon" data-i18n="roleForemanInitial">M</span><h3 data-i18n="roleForeman">Majster</h3><p data-i18n="roleForemanText">Zaznamená priebeh dňa, ľudí, počasie a fotografie priamo na objekte.</p></article>
+          <article><span class="role-icon" data-i18n="roleManagerInitial">S</span><h3 data-i18n="roleManager">Stavbyvedúci</h3><p data-i18n="roleManagerText">Má prehľad o dôkazoch, materiáloch, výdavkoch a stave objektov.</p></article>
+          <article><span class="role-icon" data-i18n="roleWorkerInitial">P</span><h3 data-i18n="roleWorker">Pracovník</h3><p data-i18n="roleWorkerText">Pripojí sa cez QR kód a odošle majstrovi požiadavku na materiál.</p></article>
         </div>
       </section>
 
       <section id="funkcie" class="features" aria-labelledby="features-title">
-        <div class="features-heading">
-          <p class="section-label">ČO MÁTE POD KONTROLOU</p>
-          <h2 id="features-title">Jeden objekt.<br />Jedno miesto pre dôkazy.</h2>
+        <div class="section-heading centered">
+          <p class="section-label" data-i18n="featuresLabel">VŠETKO PODSTATNÉ V MOBILE</p>
+          <h2 id="features-title" data-i18n="featuresTitle">Menej papierov. Viac prehľadu.</h2>
+          <p data-i18n="featuresLead">Od prvého ranného záznamu až po podklady pre účtovníka.</p>
         </div>
-        <div class="feature-list">
-          <article><span>01</span><div><h3>Stavebný denník</h3><p>Denné záznamy s počasím, GPS, ľuďmi, vykonanou prácou a poznámkami.</p></div></article>
-          <article><span>02</span><div><h3>Fotografie a účtenky</h3><p>Fotodokumentácia aj výdavky priradené ku konkrétnemu projektu. OCR pomôže prepísať údaje z účtenky.</p></div></article>
-          <article><span>03</span><div><h3>Pracovníci cez QR</h3><p>Bez hesiel a zdĺhavej registrácie. Prístup pracovníka vždy potvrdí majster.</p></div></article>
-          <article><span>04</span><div><h3>PDF pre odovzdanie</h3><p>Prehľadné výstupy z denníka a balík účteniek s tabuľkou nákladov.</p></div></article>
+        <div class="feature-grid">
+          <article class="feature-card feature-primary"><div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M6 3h12v18H6zM9 7h6M9 11h6M9 15h4"/></svg></div><h3 data-i18n="featureDiary">Stavebný denník</h3><p data-i18n="featureDiaryText">Denné záznamy s počasím, GPS, ľuďmi, vykonanou prácou a poznámkami.</p><div class="mini-ui"><span></span><span></span><span></span></div></article>
+          <article class="feature-card"><div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16v13H4zM8 6l1-2h6l1 2M8 15l3-3 2 2 2-2 3 3"/></svg></div><h3 data-i18n="featurePhotos">Fotografie a účtenky</h3><p data-i18n="featurePhotosText">Fotodokumentácia a výdavky priradené k projektu. OCR pomôže prepísať účtenku.</p></article>
+          <article class="feature-card"><div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2v6h-6v-2"/></svg></div><h3 data-i18n="featureQr">Pracovníci cez QR</h3><p data-i18n="featureQrText">Bez hesiel a registrácie. Prístup pracovníka vždy potvrdí majster.</p></article>
+          <article class="feature-card feature-dark"><div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7zM14 3v5h5M10 13h5M10 17h5"/></svg></div><h3 data-i18n="featurePdf">PDF pre odovzdanie</h3><p data-i18n="featurePdfText">Prehľadný denník a balík účteniek s tabuľkou nákladov pripravené na zdieľanie.</p></article>
         </div>
       </section>
 
       <section id="download" class="release-panel" aria-labelledby="release-title">
-        <div>
-          <p class="section-label light">AKTUÁLNA VERZIA</p>
-          <h2 id="release-title">Stiahnite si aplikáciu priamo do Android telefónu.</h2>
-          <p id="release-status">Kontrolujem najnovšiu dostupnú verziu…</p>
-        </div>
-        <a id="release-download" class="release-download is-loading" href="#download">Stiahnuť APK</a>
+        <div class="release-copy"><span class="release-orbit"><img src="/assets/app-icon.png" alt="" /></span><div><p class="section-label light" data-i18n="releaseLabel">AKTUÁLNA VERZIA</p><h2 id="release-title" data-i18n="releaseTitle">Vezmite si denník na stavbu.</h2><p id="release-status">Kontrolujem najnovšiu dostupnú verziu…</p></div></div>
+        <a id="release-download" class="release-download is-loading" href="#download"><span data-i18n="downloadApk">Stiahnuť APK</span><b>↓</b></a>
       </section>
 
       <section id="ako-nainstalovat" class="install" aria-labelledby="install-title">
-        <p class="section-label">INŠTALÁCIA MIMO GOOGLE PLAY</p>
-        <h2 id="install-title">Tri krátke kroky</h2>
+        <div class="section-heading"><p class="section-label" data-i18n="installLabel">INŠTALÁCIA MIMO GOOGLE PLAY</p><h2 id="install-title" data-i18n="installTitle">Hotovo za pár minút.</h2></div>
         <ol>
-          <li><span>1</span><p><strong>Stiahnite APK.</strong> Telefón môže upozorniť, že súbor nie je z Google Play.</p></li>
-          <li><span>2</span><p><strong>Povoľte inštaláciu.</strong> V zobrazenom nastavení povoľte tomuto prehliadaču inštalovať neznáme aplikácie.</p></li>
-          <li><span>3</span><p><strong>Otvorte aplikáciu.</strong> Pri ďalšej verzii ju môžete nainštalovať priamo cez pôvodnú aplikáciu.</p></li>
+          <li><span>1</span><div><strong data-i18n="step1Title">Stiahnite APK</strong><p data-i18n="step1Text">Telefón môže upozorniť, že súbor nie je z Google Play.</p></div></li>
+          <li><span>2</span><div><strong data-i18n="step2Title">Povoľte inštaláciu</strong><p data-i18n="step2Text">Povoľte tomuto prehliadaču inštalovať neznáme aplikácie.</p></div></li>
+          <li><span>3</span><div><strong data-i18n="step3Title">Otvorte aplikáciu</strong><p data-i18n="step3Text">Ďalšie verzie potom nainštalujete ako bežnú aktualizáciu.</p></div></li>
         </ol>
       </section>
     </main>
 
     <footer>
-      <div><strong>Stavebný denník</strong><span>Pilotná verzia pre Android</span></div>
-      <a href="/privacy.html">Ochrana súkromia</a>
+      <div class="footer-brand"><img src="/assets/app-icon.png" alt="" /><div><strong>Stavebný denník</strong><span data-i18n="footerPilot">Pilotná verzia pre Android</span></div></div>
+      <a href="/privacy.html" data-i18n="privacy">Ochrana súkromia</a>
     </footer>
     <script src="/download.js" data-version-manifest="/app-version.json" defer></script>
   </body>

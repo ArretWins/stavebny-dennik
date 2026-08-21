@@ -41,11 +41,22 @@ describe("passwordless worker portal contract", () => {
   });
   it("serves a public product page with a manifest-driven current APK", () => {
     const proxy = readFileSync("worker-portal/src/_worker.js", "utf8");
-    expect(landing).toContain("Pre ľudí, ktorí riadia stavbu v teréne");
+    expect(landing).toContain("Pre tím, ktorý riadi stavbu priamo v teréne");
     expect(landing).toContain("id=\"download-button\"");
     expect(landing).toContain("app-version.json");
     expect(landingScript).toContain('manifest.androidUrls?.["arm64-v8a"]');
     expect(landingScript).toContain('cache: "no-store"');
+    expect(landing).toContain('data-lang="uk"');
+    expect(landing).toContain('data-lang="ru"');
+    expect(landingScript).toContain('locale: "uk-UA"');
+    expect(landingScript).toContain('locale: "ru-RU"');
+    expect(landingScript).toContain("stavba-site-language");
+    const translationKeys = [
+      ...landing.matchAll(/data-i18n(?:-aria)?="([^"]+)"/g),
+    ].map((match) => match[1]);
+    for (const key of new Set(translationKeys)) {
+      expect(landingScript.match(new RegExp(`\\b${key}:`, "g"))?.length).toBe(3);
+    }
     expect(proxy).toContain("!url.searchParams.has('token')");
     expect(proxy).toContain("'/download'");
     expect(proxy).toContain("url.pathname === '/worker'");
