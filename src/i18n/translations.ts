@@ -1,6 +1,6 @@
 export const sk = {
   app: {
-    name: "Stavebný denník",
+    name: "Stavuno",
     evidenceGrade: "Dôkazový záznam pre stavbu",
     loading: "Načítavam…",
     today: "Dnes",
@@ -13,7 +13,7 @@ export const sk = {
     required: "povinné",
   },
   auth: {
-    title: "Stavebný denník",
+    title: "Stavuno",
     subtitle: "Jednoduchý záznam práce, dôkazov a prestojov.",
     email: "E-mail",
     password: "Heslo",

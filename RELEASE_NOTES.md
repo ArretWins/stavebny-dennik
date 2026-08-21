@@ -1,15 +1,15 @@
-# Stavebný denník — v1.2.4
+# Stavuno — v1.2.5
 
-Simplified diary update — 12 August 2026.
+Brand update — 21 August 2026.
 
 ## Changed
 
-- Removed plans, tasks, defect tasks, tomorrow planning and their navigation.
-- Removed the weekly report from the dashboard and reports section.
-- Added manual site-weather entry to the diary: temperature, observed conditions, wind and precipitation.
-- Manual weather is saved as evidence, synchronized and displayed on the dashboard.
+- Renamed the application and public website to Stavuno.
+- Added the brand promise “Stavba pod kontrolou.” to the public identity.
+- Kept the Android package ID, local database and deep-link scheme unchanged so existing installations update safely without losing data.
+- Renamed new release APK files to `stavuno-<version>-<abi>.apk`.
 
 ## Verification
 
 - TypeScript, translations and visible-copy checks pass.
-- 85 test files and 284 tests pass.
+- Full automated validation passes.

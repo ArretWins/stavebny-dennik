@@ -8,9 +8,9 @@ const releaseStatus = document.getElementById("release-status");
 const translations = {
   sk: {
     locale: "sk-SK",
-    title: "Stavebný denník — aplikácia pre majstrov",
-    description: "Stavebný denník pre majstrov a malé stavebné tímy. Denné záznamy, fotodokumentácia, účtenky a požiadavky na materiál v jednej aplikácii.",
-    navAria: "Hlavná navigácia", homeAria: "Stavebný denník — domov", languageAria: "Jazyk stránky",
+    title: "Stavuno — Stavba pod kontrolou.",
+    description: "Stavuno pre majstrov a malé stavebné tímy. Denné záznamy, fotodokumentácia, účtenky a požiadavky na materiál v jednej aplikácii.",
+    navAria: "Hlavná navigácia", homeAria: "Stavuno — domov", languageAria: "Jazyk stránky",
     navFeatures: "Funkcie", workerEntry: "Vstup pre pracovníka", pilotBadge: "Bezplatná pilotná verzia",
     heroKicker: "PRE MAJSTROV · STAVBYVEDÚCICH · MALÉ TÍMY", heroTitle1: "Stavba pod kontrolou.", heroTitle2: "Dôkazy vždy poruke.",
     heroLead: "Denné záznamy, fotografie, účtenky a požiadavky pracovníkov na jednom mieste — priamo v mobile, aj bez stabilného internetu.",
@@ -39,9 +39,9 @@ const translations = {
   },
   uk: {
     locale: "uk-UA",
-    title: "Будівельний щоденник — застосунок для виконробів",
-    description: "Будівельний щоденник для виконробів і невеликих будівельних команд. Щоденні записи, фотографії, чеки та заявки на матеріали в одному застосунку.",
-    navAria: "Головна навігація", homeAria: "Будівельний щоденник — головна", languageAria: "Мова сайту",
+    title: "Stavuno — будівництво під контролем",
+    description: "Stavuno для виконробів і невеликих будівельних команд. Щоденні записи, фотографії, чеки та заявки на матеріали в одному застосунку.",
+    navAria: "Головна навігація", homeAria: "Stavuno — головна", languageAria: "Мова сайту",
     navFeatures: "Функції", workerEntry: "Вхід для працівника", pilotBadge: "Безкоштовна пілотна версія",
     heroKicker: "ДЛЯ ВИКОНРОБІВ · КЕРІВНИКІВ · МАЛИХ КОМАНД", heroTitle1: "Будівництво під контролем.", heroTitle2: "Докази завжди поруч.",
     heroLead: "Щоденні записи, фотографії, чеки та заявки працівників в одному місці — прямо в телефоні, навіть без стабільного інтернету.",
@@ -70,9 +70,9 @@ const translations = {
   },
   ru: {
     locale: "ru-RU",
-    title: "Строительный дневник — приложение для прорабов",
-    description: "Строительный дневник для прорабов и небольших строительных команд. Ежедневные записи, фотографии, чеки и заявки на материалы в одном приложении.",
-    navAria: "Главная навигация", homeAria: "Строительный дневник — главная", languageAria: "Язык сайта",
+    title: "Stavuno — стройка под контролем",
+    description: "Stavuno для прорабов и небольших строительных команд. Ежедневные записи, фотографии, чеки и заявки на материалы в одном приложении.",
+    navAria: "Главная навигация", homeAria: "Stavuno — главная", languageAria: "Язык сайта",
     navFeatures: "Функции", workerEntry: "Вход для работника", pilotBadge: "Бесплатная пилотная версия",
     heroKicker: "ДЛЯ ПРОРАБОВ · РУКОВОДИТЕЛЕЙ · НЕБОЛЬШИХ КОМАНД", heroTitle1: "Стройка под контролем.", heroTitle2: "Доказательства всегда под рукой.",
     heroLead: "Ежедневные записи, фотографии, чеки и заявки работников в одном месте — прямо в телефоне, даже без стабильного интернета.",

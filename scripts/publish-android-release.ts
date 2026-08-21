@@ -34,7 +34,7 @@ async function main() {
   }
 
   for (const abi of abis) {
-    const fileName = `stavebny-dennik-${manifest.version}-${abi}.apk`;
+    const fileName = `stavuno-${manifest.version}-${abi}.apk`;
     const apkPath = resolve(`android/app/build/outputs/apk/release/app-${abi}-release.apk`);
     const expectedUrl = `${supabaseUrl}/storage/v1/object/public/app-releases/${fileName}`;
     if (manifest.androidUrls[abi] !== expectedUrl) throw new Error(`APP_UPDATE_URL_MISMATCH_${abi}`);

@@ -58,7 +58,7 @@ jobs:
           ./gradlew assembleRelease bundleRelease --no-daemon
       - uses: actions/upload-artifact@v6
         with:
-          name: stavebny-dennik-android-${{ github.sha }}
+          name: stavuno-android-${{ github.sha }}
           path: |
             android/app/build/outputs/apk/release/*.apk
             android/app/build/outputs/bundle/release/*.aab

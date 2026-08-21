@@ -42,6 +42,8 @@ describe("passwordless worker portal contract", () => {
   it("serves a public product page with a manifest-driven current APK", () => {
     const proxy = readFileSync("worker-portal/src/_worker.js", "utf8");
     expect(landing).toContain("Pre tím, ktorý riadi stavbu priamo v teréne");
+    expect(landing).toContain("Stavuno");
+    expect(landing).toContain("Stavba pod kontrolou.");
     expect(landing).toContain("id=\"download-button\"");
     expect(landing).toContain('class="project-board"');
     expect(landing).not.toContain('class="phone"');

@@ -47,6 +47,19 @@ describe("pilot release configuration", () => {
     expect(gradle).toContain(`versionName "${update.version}"`);
   });
 
+  it("ships the Stavuno brand without changing the Android application identity", () => {
+    const app = JSON.parse(readFileSync("app.json", "utf8")).expo;
+    const strings = readFileSync(
+      "android/app/src/main/res/values/strings.xml",
+      "utf8",
+    );
+    const gradle = readFileSync("android/app/build.gradle", "utf8");
+    expect(app.name).toBe("Stavuno");
+    expect(strings).toContain('<string name="app_name">Stavuno</string>');
+    expect(app.android.package).toBe("sk.stavebnydennik.app");
+    expect(gradle).toContain("applicationId 'sk.stavebnydennik.app'");
+  });
+
   it("persists Supabase sessions in React Native storage", () => {
     const client = readFileSync("src/services/supabase.ts", "utf8");
     expect(client).toContain(

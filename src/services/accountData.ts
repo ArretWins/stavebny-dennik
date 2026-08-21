@@ -59,7 +59,7 @@ export async function exportAccountData(localState: AppState): Promise<string> {
   }
   const directory = FileSystem.cacheDirectory ?? FileSystem.documentDirectory;
   if (!directory) throw new Error("FILE_DIRECTORY_UNAVAILABLE");
-  const path = `${directory}stavebny-dennik-export-${new Date().toISOString().slice(0, 10)}.json`;
+  const path = `${directory}stavuno-export-${new Date().toISOString().slice(0, 10)}.json`;
   await FileSystem.writeAsStringAsync(path, `${JSON.stringify(payload, null, 2)}\n`, {
     encoding: FileSystem.EncodingType.UTF8,
   });
