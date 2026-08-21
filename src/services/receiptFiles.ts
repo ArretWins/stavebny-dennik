@@ -6,6 +6,7 @@ import { createId, nowIso } from "@/domain/ids";
 import type { ReceiptFile } from "@/domain/types";
 import type { PhotoSource } from "./attachments";
 import { compressPilotImage } from "./imageCompression";
+import { launchPhotoCamera } from "./cameraLauncher";
 
 const MAX_RECEIPT_FILE_SIZE = 25 * 1024 * 1024;
 const MAX_RECEIPT_PAGES = 20;
@@ -61,13 +62,9 @@ export async function pickReceiptPhotos(
   source: PhotoSource,
   startOrder = 0,
 ): Promise<ReceiptFile[]> {
-  if (source === "camera") {
-    const permission = await ImagePicker.requestCameraPermissionsAsync();
-    if (!permission.granted) throw new Error("CAMERA_PERMISSION_DENIED");
-  }
   const result =
     source === "camera"
-      ? await ImagePicker.launchCameraAsync({
+      ? await launchPhotoCamera({
           mediaTypes: ["images"],
           quality: 0.85,
         })

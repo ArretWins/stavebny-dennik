@@ -1,6 +1,6 @@
 {
   "name": "stavuno",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -20,7 +20,8 @@
     "smoke:production": "tsx scripts/pilot-production-smoke.ts",
     "smoke:client-share": "node --env-file=.env --import tsx scripts/client-share-production-smoke.ts",
     "validate": "npm run typecheck && npm run lint:translations && npm run lint:copy && npm test",
-    "ios": "expo run:ios"
+    "ios": "expo run:ios",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.1.2",
@@ -68,6 +69,7 @@
     "jsqr": "^1.4.0",
     "pdf-lib": "^1.17.1",
     "pdfmake": "^0.2.20",
+    "patch-package": "^8.0.0",
     "supabase": "^2.109.1",
     "tsx": "^4.19.3",
     "typescript": "~5.8.3",

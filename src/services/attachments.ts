@@ -6,6 +6,7 @@ import { createId, nowIso } from "@/domain/ids";
 import { validateAttachment } from "@/domain/validation";
 import { supabase } from "./supabase";
 import { compressPilotImage } from "./imageCompression";
+import { launchPhotoCamera } from "./cameraLauncher";
 import {
   bytesToHex,
   exifCoordinates,
@@ -23,13 +24,9 @@ export async function pickPhoto(
   entityId?: string,
   evidenceRole: Attachment["evidenceRole"] = "general",
 ): Promise<Attachment | undefined> {
-  if (source === "camera") {
-    const permission = await ImagePicker.requestCameraPermissionsAsync();
-    if (!permission.granted) throw new Error("CAMERA_PERMISSION_DENIED");
-  }
   const result =
     source === "camera"
-      ? await ImagePicker.launchCameraAsync({
+      ? await launchPhotoCamera({
           mediaTypes: ["images"],
           quality: 0.8,
           exif: true,

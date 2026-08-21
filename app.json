@@ -2,7 +2,7 @@
   "expo": {
     "name": "Stavuno",
     "slug": "stavuno",
-    "version": "1.2.5",
+    "version": "1.2.6",
     "newArchEnabled": false,
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -10,7 +10,7 @@
     "scheme": "stavebnydennik",
     "android": {
       "package": "sk.stavebnydennik.app",
-      "versionCode": 8,
+      "versionCode": 9,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#F8F5EF"

@@ -1,0 +1,35 @@
+diff --git a/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/ImagePickerModule.kt b/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/ImagePickerModule.kt
+index ba07483..2ca76ba 100644
+--- a/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/ImagePickerModule.kt
++++ b/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/ImagePickerModule.kt
+@@ -271,6 +271,18 @@ class ImagePickerModule : Module() {
+   private suspend fun ensureCameraPermissionsAreGranted(): Unit = suspendCancellableCoroutine { continuation ->
+     val permissions = appContext.permissions ?: throw ModuleNotFoundException("Permissions")
+ 
++    val requiredPermissions = listOfNotNull(
++      Manifest.permission.WRITE_EXTERNAL_STORAGE.takeIf { Build.VERSION.SDK_INT < Build.VERSION_CODES.Q },
++      Manifest.permission.CAMERA
++    ).toTypedArray()
++
++    // Android 16 on Pixel devices can leave an already-granted permission request
++    // unresolved. Do not open the permission dialog when every permission is present.
++    if (permissions.hasGrantedPermissions(*requiredPermissions)) {
++      continuation.resume(Unit)
++      return@suspendCancellableCoroutine
++    }
++
+     permissions.askForPermissions(
+       { permissionsResponse ->
+         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+@@ -288,10 +300,7 @@ class ImagePickerModule : Module() {
+           continuation.resumeWithException(UserRejectedPermissionsException())
+         }
+       },
+-      *listOfNotNull(
+-        Manifest.permission.WRITE_EXTERNAL_STORAGE.takeIf { Build.VERSION.SDK_INT < Build.VERSION_CODES.Q },
+-        Manifest.permission.CAMERA
+-      ).toTypedArray()
++      *requiredPermissions
+     )
+   }
+ 
