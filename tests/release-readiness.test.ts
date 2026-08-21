@@ -32,7 +32,7 @@ describe("pilot release configuration", () => {
     expect(workflow).toContain("Resolve production application configuration");
     expect(workflow).toContain("secrets.SUPABASE_URL");
     expect(workflow).toContain("supabase projects api-keys");
-    expect(workflow).toContain("retention-days: 30");
+    expect(workflow).toContain("retention-days: 2");
   });
 
   it("keeps application, Android and update-manifest versions aligned", () => {

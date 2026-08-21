@@ -34,5 +34,7 @@ jobs:
         with:
           name: stavba-pilot-backup-${{ github.run_id }}
           path: backups/
-          retention-days: 14
+          # Daily backups grow quickly on the free Actions storage allowance.
+          # Three rolling copies are enough alongside Supabase's own storage.
+          retention-days: 3
           if-no-files-found: error

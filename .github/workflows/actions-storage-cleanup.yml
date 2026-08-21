@@ -1,0 +1,54 @@
+name: Actions storage cleanup
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/actions-storage-cleanup.yml"
+  schedule:
+    - cron: "43 3 * * 1"
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Keep only useful build artifacts
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const artifacts = await github.paginate(
+              github.rest.actions.listArtifactsForRepo,
+              { owner: context.repo.owner, repo: context.repo.repo, per_page: 100 },
+            );
+
+            const newestFirst = artifacts
+              .filter((artifact) => !artifact.expired)
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            const keep = new Set();
+            const android = newestFirst.filter((artifact) =>
+              artifact.name.startsWith("stavebny-dennik-android-"),
+            );
+            const backups = newestFirst.filter((artifact) =>
+              artifact.name.startsWith("stavba-pilot-backup-"),
+            );
+
+            if (android[0]) keep.add(android[0].id);
+            for (const artifact of backups.slice(0, 3)) keep.add(artifact.id);
+
+            for (const artifact of newestFirst) {
+              const managed =
+                artifact.name.startsWith("stavebny-dennik-android-") ||
+                artifact.name.startsWith("stavba-pilot-backup-");
+              if (!managed || keep.has(artifact.id)) continue;
+              await github.rest.actions.deleteArtifact({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: artifact.id,
+              });
+              core.info(`Deleted ${artifact.name} (${artifact.size_in_bytes} bytes)`);
+            }

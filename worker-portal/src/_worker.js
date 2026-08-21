@@ -85,6 +85,18 @@ export default {
       return proxyPrivatePage(request, upstreamShareUrl);
     if (url.pathname === '/supplier-quote')
       return proxyPrivatePage(request, upstreamSupplierQuoteUrl);
+    if (url.pathname === '/' && url.searchParams.has('token')) {
+      const invitedWorkerUrl = new URL('/worker/', url);
+      invitedWorkerUrl.search = url.search;
+      return env.ASSETS.fetch(new Request(invitedWorkerUrl, request));
+    }
+    if (url.pathname === '/' && !url.searchParams.has('token')) {
+      const landingUrl = new URL('/download', url);
+      return env.ASSETS.fetch(new Request(landingUrl, request));
+    }
+    if (url.pathname === '/worker') {
+      return Response.redirect(new URL(`/worker/${url.search}`, url), 308);
+    }
     return env.ASSETS.fetch(request);
   },
 };

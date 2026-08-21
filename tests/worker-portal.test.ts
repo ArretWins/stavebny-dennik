@@ -7,6 +7,8 @@ describe("passwordless worker portal contract", () => {
     "utf8",
   );
   const staticSource = readFileSync("worker-portal/src/app.js", "utf8");
+  const landing = readFileSync("worker-portal/src/download.html", "utf8");
+  const landingScript = readFileSync("worker-portal/src/download.js", "utf8");
   const migration = readFileSync(
     "supabase/migrations/202607140001_receipts_workers_materials.sql",
     "utf8",
@@ -36,6 +38,18 @@ describe("passwordless worker portal contract", () => {
       /destination\.searchParams\.set\(["']token["'],\s*token\)/,
     );
     expect(staticSource).toContain("signInAnonymously");
+  });
+  it("serves a public product page with a manifest-driven current APK", () => {
+    const proxy = readFileSync("worker-portal/src/_worker.js", "utf8");
+    expect(landing).toContain("Pre ľudí, ktorí riadia stavbu v teréne");
+    expect(landing).toContain("id=\"download-button\"");
+    expect(landing).toContain("app-version.json");
+    expect(landingScript).toContain('manifest.androidUrls?.["arm64-v8a"]');
+    expect(landingScript).toContain('cache: "no-store"');
+    expect(proxy).toContain("!url.searchParams.has('token')");
+    expect(proxy).toContain("'/download'");
+    expect(proxy).toContain("url.pathname === '/worker'");
+    expect(proxy).toContain("'/worker/'");
   });
   it("creates material requests transactionally and only lists the current worker requests", () => {
     expect(source).toContain("rpc('create_material_request'");
@@ -183,6 +197,7 @@ describe("passwordless worker portal contract", () => {
     expect(manager).toContain("setInterval");
     expect(manager).toContain("5_000");
     expect(manager).toContain("https://stavebny-dennik-worker.pages.dev");
+    expect(manager).toContain("/worker/?token=");
   });
   it("proxies private supplier RFQ pages without exposing service credentials", () => {
     const proxy = readFileSync("worker-portal/src/_worker.js", "utf8");
