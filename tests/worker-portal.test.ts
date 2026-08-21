@@ -43,6 +43,8 @@ describe("passwordless worker portal contract", () => {
     const proxy = readFileSync("worker-portal/src/_worker.js", "utf8");
     expect(landing).toContain("Pre tím, ktorý riadi stavbu priamo v teréne");
     expect(landing).toContain("id=\"download-button\"");
+    expect(landing).toContain('class="project-board"');
+    expect(landing).not.toContain('class="phone"');
     expect(landing).toContain("app-version.json");
     expect(landingScript).toContain('manifest.androidUrls?.["arm64-v8a"]');
     expect(landingScript).toContain('cache: "no-store"');
