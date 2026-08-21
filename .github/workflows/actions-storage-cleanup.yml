@@ -26,9 +26,9 @@ jobs:
               { owner: context.repo.owner, repo: context.repo.repo, per_page: 100 },
             );
 
-            const newestFirst = artifacts
-              .filter((artifact) => !artifact.expired)
-              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            const newestFirst = artifacts.sort(
+              (a, b) => new Date(b.created_at) - new Date(a.created_at),
+            );
             const keep = new Set();
             const android = newestFirst.filter((artifact) =>
               artifact.name.startsWith("stavebny-dennik-android-"),
@@ -38,7 +38,8 @@ jobs:
             );
 
             if (android[0]) keep.add(android[0].id);
-            for (const artifact of backups.slice(0, 3)) keep.add(artifact.id);
+            for (const artifact of backups.filter((artifact) => !artifact.expired).slice(0, 2))
+              keep.add(artifact.id);
 
             for (const artifact of newestFirst) {
               const managed =

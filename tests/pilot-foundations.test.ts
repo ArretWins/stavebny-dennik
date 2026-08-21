@@ -141,7 +141,7 @@ describe("static worker portal and recoverable backups", () => {
     expect(restoreVerify).toContain("Restored object checksum mismatch");
     expect(restoreVerify).toContain("auth.users");
     expect(workflow).toContain("cron:");
-    expect(workflow).toContain("retention-days: 3");
+    expect(workflow).toContain("retention-days: 2");
     expect(restoreWorkflow).toContain("workflow_dispatch:");
     expect(restoreWorkflow).toContain("DRILL_SUPABASE_DB_URL");
   });
