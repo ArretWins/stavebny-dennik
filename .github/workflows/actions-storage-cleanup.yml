@@ -31,7 +31,8 @@ jobs:
             );
             const keep = new Set();
             const android = newestFirst.filter((artifact) =>
-              artifact.name.startsWith("stavebny-dennik-android-"),
+              artifact.name.startsWith("stavebny-dennik-android-") ||
+              artifact.name.startsWith("stavuno-android-"),
             );
             const backups = newestFirst.filter((artifact) =>
               artifact.name.startsWith("stavba-pilot-backup-"),
@@ -44,6 +45,7 @@ jobs:
             for (const artifact of newestFirst) {
               const managed =
                 artifact.name.startsWith("stavebny-dennik-android-") ||
+                artifact.name.startsWith("stavuno-android-") ||
                 artifact.name.startsWith("stavba-pilot-backup-");
               if (!managed || keep.has(artifact.id)) continue;
               await github.rest.actions.deleteArtifact({

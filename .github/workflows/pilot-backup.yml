@@ -5,6 +5,9 @@ on:
   schedule:
     - cron: "17 2 * * *"
 
+permissions:
+  contents: write
+
 jobs:
   backup:
     runs-on: ubuntu-latest
@@ -30,11 +33,16 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       - name: Verify backup checksums
         run: npm run backup:verify -- "$(find backups -name manifest.json -print -quit)"
-      - uses: actions/upload-artifact@v6
-        with:
-          name: stavba-pilot-backup-${{ github.run_id }}
-          path: backups/
-          # Daily backups grow quickly on the free Actions storage allowance.
-          # Two rolling copies keep recovery coverage below the free Actions cap.
-          retention-days: 2
-          if-no-files-found: error
+      - name: Publish rolling verified backup
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tar -czf stavuno-pilot-backup.tar.gz backups/
+          if ! gh release view pilot-backup-latest >/dev/null 2>&1; then
+            gh release create pilot-backup-latest \
+              --target "$GITHUB_SHA" \
+              --title "Latest verified pilot backup" \
+              --notes "Automatically replaced by the latest verified backup."
+          fi
+          gh release upload pilot-backup-latest stavuno-pilot-backup.tar.gz --clobber
