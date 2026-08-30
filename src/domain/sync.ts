@@ -17,7 +17,9 @@ export async function processOutbox<T extends OutboxItem>(items: T[], handler: (
   const next = [...items];
   for (let index = 0; index < next.length; index += 1) {
     const item = next[index];
-    if (!['pending', 'failed'].includes(item.status)) continue;
+    // A persisted `syncing` item means the previous app process was interrupted.
+    // Sync runs are serialized, so it is safe and necessary to retry it here.
+    if (!['pending', 'failed', 'syncing'].includes(item.status)) continue;
     const syncing = markSyncing(item, at);
     next[index] = syncing;
     try { next[index] = markSynced(syncing, await handler(syncing), at); }

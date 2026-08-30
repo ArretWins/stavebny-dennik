@@ -6,6 +6,7 @@ import {
   syncItemCategory,
 } from "../src/domain/syncCenter";
 import type { OutboxItem } from "../src/domain/types";
+import { shouldAttemptSync } from "../src/domain/network";
 
 function item(status: OutboxItem["status"], id: string): OutboxItem {
   return {
@@ -44,7 +45,14 @@ describe("sync center", () => {
     expect(syncErrorKind("JWT expired")).toBe("authentication");
     expect(syncErrorKind("DAY_CLOSURE_IMMUTABLE")).toBe("conflict");
     expect(syncErrorKind("Storage upload failed")).toBe("file");
+    expect(syncErrorKind("ATTACHMENT_READ_FAILED")).toBe("file");
     expect(syncErrorKind("unknown")).toBe("server");
+  });
+
+  it("attempts a real sync when only the reachability probe is blocked", () => {
+    expect(shouldAttemptSync({ isConnected: true, isInternetReachable: false })).toBe(true);
+    expect(shouldAttemptSync({ isConnected: null, isInternetReachable: null })).toBe(true);
+    expect(shouldAttemptSync({ isConnected: false, isInternetReachable: true })).toBe(false);
   });
 
   it("hides completed work and puts failed work first", () => {

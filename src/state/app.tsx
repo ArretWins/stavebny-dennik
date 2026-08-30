@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import NetInfo from "@react-native-community/netinfo";
 import * as Crypto from "expo-crypto";
+import { shouldAttemptSync } from "@/domain/network";
 import type {
   AppNotification,
   Attachment,
@@ -4549,12 +4550,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const pendingAfter = nextOutbox.filter(
       (item) => item.status !== "synced",
     ).length;
+    const firstFailure = nextOutbox.find(
+      (item) => item.status === "failed" && item.lastError,
+    );
     void recordSyncRun({
       status: failedCount ? "partial" : "success",
       pendingBefore: snapshot.outbox.length,
       pendingAfter,
       failedCount,
       durationMs: Date.now() - startedAt,
+      error: firstFailure?.lastError
+        ? new Error(firstFailure.lastError)
+        : undefined,
       projectId: snapshot.selectedProjectId,
     });
   }, [persist]);
@@ -4571,8 +4578,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!userId || !supabase) return;
     return NetInfo.addEventListener((network) => {
       if (
-        network.isConnected &&
-        network.isInternetReachable !== false &&
+        shouldAttemptSync(network) &&
         pendingCount(storeRef.current.snapshot.outbox) > 0
       )
         void syncNow().catch(() => undefined);
@@ -4588,7 +4594,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (pendingCount(storeRef.current.snapshot.outbox) > 0)
       void NetInfo.fetch()
         .then((network) => {
-          if (network.isConnected && network.isInternetReachable !== false)
+          if (shouldAttemptSync(network))
             return syncNow();
         })
         .catch(() => undefined);

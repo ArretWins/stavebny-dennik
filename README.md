@@ -78,7 +78,7 @@ The `Pilot backup` GitHub Actions workflow runs daily and retains repository art
 
 ## Android pilot distribution
 
-Version 1.2.6 is signed with the permanent upload key. Four ABI-specific APKs are stored in the public `app-releases` Supabase bucket; only the service role can publish or replace them. The app checks the HTTPS manifest at `https://stavuno.pages.dev/app-version.json` only when the user taps **Skontrolovať aktualizáciu** in settings, validates the download host and selects the APK matching the device architecture. The signed AAB and all APKs are also retained as a private GitHub Actions artifact for 2 days.
+Version 1.2.7 is signed with the permanent upload key. Four ABI-specific APKs are stored in the public `app-releases` Supabase bucket; only the service role can publish or replace them. The app checks the HTTPS manifest at `https://stavuno.pages.dev/app-version.json` only when the user taps **Skontrolovať aktualizáciu** in settings, validates the download host and selects the APK matching the device architecture. The signed AAB and all APKs are also retained as a private GitHub Actions artifact for 2 days.
 
 ## Release boundary
 

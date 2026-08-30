@@ -73,14 +73,14 @@ export function syncItemCategory(type: OutboxItem["type"]): SyncItemCategory {
 
 export function syncErrorKind(error?: string): SyncErrorKind {
   const value = (error ?? "").toLowerCase();
+  if (/file|upload|storage|uri|image|document|bucket|_read_failed/.test(value))
+    return "file";
   if (/network|fetch|offline|internet|timeout|timed out/.test(value))
     return "offline";
   if (/auth|jwt|session|permission|unauthorized|forbidden/.test(value))
     return "authentication";
   if (/conflict|locked|immutable|already|duplicate/.test(value))
     return "conflict";
-  if (/file|upload|storage|uri|image|document|bucket/.test(value))
-    return "file";
   return "server";
 }
 

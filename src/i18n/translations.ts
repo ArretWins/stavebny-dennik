@@ -722,7 +722,7 @@ export const sk = {
     pendingTitle: "Čaká na odoslanie: {count}",
     failedTitle: "Nepodarilo sa odoslať: {count}",
     offlineHint:
-      "Dáta zostávajú bezpečne uložené v telefóne. Po návrate internetu sa odoslanie spustí automaticky.",
+      "Dáta zostávajú bezpečne uložené v telefóne. Aplikácia odoslanie automaticky zopakuje; príčina neúspechu je uvedená pri každej položke.",
     retryAll: "Odoslať všetko teraz",
     syncing: "Odosielam…",
     allSynced: "Všetko je odoslané",
