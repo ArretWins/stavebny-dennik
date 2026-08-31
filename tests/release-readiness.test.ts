@@ -17,7 +17,7 @@ describe("pilot release configuration", () => {
     expect(workflow).toContain("--node-modules-dir=auto");
   });
 
-  it("refuses unsigned Android releases and retains signed artifacts", () => {
+  it("refuses unsigned Android releases and publishes durable signed assets", () => {
     const gradle = readFileSync("android/app/build.gradle", "utf8");
     const workflow = readFileSync(".github/workflows/android-release.yml", "utf8");
     expect(gradle).toContain("refusing to use the debug key");
@@ -32,7 +32,10 @@ describe("pilot release configuration", () => {
     expect(workflow).toContain("Resolve production application configuration");
     expect(workflow).toContain("secrets.SUPABASE_URL");
     expect(workflow).toContain("supabase projects api-keys");
-    expect(workflow).toContain("retention-days: 2");
+    expect(workflow).toContain("npm run publish:android-release");
+    expect(workflow).toContain("gh release create");
+    expect(workflow).toContain("contents: write");
+    expect(workflow).not.toContain("actions/upload-artifact");
   });
 
   it("keeps application, Android and update-manifest versions aligned", () => {
