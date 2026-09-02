@@ -19,3 +19,12 @@
 
 /download.js
   Cache-Control: no-cache
+
+/reset-password.html
+  Cache-Control: no-store
+
+/reset-password
+  Cache-Control: no-store
+
+/reset-password.js
+  Cache-Control: no-store

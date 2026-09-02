@@ -33,8 +33,8 @@ const accountDeletionAudit = readFileSync(
 
 describe("project lifecycle safeguards", () => {
   it("does not create an authenticated app state before email confirmation", () => {
-    expect(auth).toContain("if (!data.session) return 'confirmation_required'");
-    expect(auth).toContain("data.session.user.id");
+    expect(auth).toContain('if (!data.session) return "confirmation_required"');
+    expect(auth).toContain("setUser(toAuthUser(data.session.user))");
   });
 
   it("isolates cached data by authenticated user", () => {

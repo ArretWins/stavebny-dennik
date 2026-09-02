@@ -1,6 +1,6 @@
 {
   "name": "stavuno",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -19,6 +19,7 @@
     "backup:drill:verify": "tsx scripts/verify-restore-drill.ts",
     "smoke:production": "tsx scripts/pilot-production-smoke.ts",
     "smoke:client-share": "node --env-file=.env --import tsx scripts/client-share-production-smoke.ts",
+    "smoke:password-recovery": "tsx scripts/password-recovery-production-smoke.ts",
     "validate": "npm run typecheck && npm run lint:translations && npm run lint:copy && npm test",
     "ios": "expo run:ios",
     "postinstall": "patch-package"
