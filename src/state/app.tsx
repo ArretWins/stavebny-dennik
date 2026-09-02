@@ -6,9 +6,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import NetInfo from "@react-native-community/netinfo";
 import * as Crypto from "expo-crypto";
-import { shouldAttemptSync } from "@/domain/network";
 import type {
   AppNotification,
   Attachment,
@@ -63,7 +61,12 @@ import type {
 } from "@/domain/types";
 import type { ControlTowerItem } from "@/domain/controlTower";
 import { createId, localDateIso, nowIso } from "@/domain/ids";
-import { enqueue, pendingCount, processOutbox } from "@/domain/sync";
+import {
+  enqueue,
+  pendingCount,
+  processOutbox,
+  summarizeOutbox,
+} from "@/domain/sync";
 import {
   insertDelay,
   insertDiary,
@@ -104,6 +107,7 @@ import {
 } from "@/services/pushNotifications";
 import { trackPilotEvent } from "@/services/pilotAccount";
 import { recordClientError, recordSyncRun } from "@/services/monitoring";
+import { useAutomaticSync } from "./useAutomaticSync";
 import {
   listProjectPlansAndTasks,
   insertSiteTaskComment,
@@ -617,7 +621,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const storeRef = React.useRef(new LocalStore());
   const syncInFlightRef = React.useRef<Promise<void> | undefined>(undefined);
-  const startupSyncUserRef = React.useRef<string | undefined>(undefined);
   useEffect(() => {
     if (userId && supabase)
       void registerPushSubscription().catch(() => undefined);
@@ -4281,16 +4284,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         safeMessage: "Synchronizácia sa neočakávane prerušila.",
         context: {
           operation: "process_outbox",
-          pendingCount: snapshot.outbox.length,
+          pendingCount: pendingCount(snapshot.outbox),
         },
         projectId: snapshot.selectedProjectId,
       });
+      const failedSummary = summarizeOutbox(snapshot.outbox);
       void recordSyncRun({
         status: "failed",
-        pendingBefore: snapshot.outbox.length,
-        pendingAfter: snapshot.outbox.length,
-        failedCount: snapshot.outbox.filter((item) => item.status === "failed")
-          .length,
+        pendingBefore: failedSummary.pendingCount,
+        pendingAfter: failedSummary.pendingCount,
+        failedCount: failedSummary.failedCount,
         durationMs: Date.now() - startedAt,
         error,
         projectId: snapshot.selectedProjectId,
@@ -4544,23 +4547,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           },
       ),
     }));
-    const failedCount = nextOutbox.filter(
-      (item) => item.status === "failed",
-    ).length;
-    const pendingAfter = nextOutbox.filter(
-      (item) => item.status !== "synced",
-    ).length;
-    const firstFailure = nextOutbox.find(
-      (item) => item.status === "failed" && item.lastError,
-    );
+    const beforeSummary = summarizeOutbox(snapshot.outbox);
+    const afterSummary = summarizeOutbox(nextOutbox);
     void recordSyncRun({
-      status: failedCount ? "partial" : "success",
-      pendingBefore: snapshot.outbox.length,
-      pendingAfter,
-      failedCount,
+      status: afterSummary.failedCount ? "partial" : "success",
+      pendingBefore: beforeSummary.pendingCount,
+      pendingAfter: afterSummary.pendingCount,
+      failedCount: afterSummary.failedCount,
       durationMs: Date.now() - startedAt,
-      error: firstFailure?.lastError
-        ? new Error(firstFailure.lastError)
+      error: afterSummary.firstError
+        ? new Error(afterSummary.firstError)
         : undefined,
       projectId: snapshot.selectedProjectId,
     });
@@ -4574,31 +4570,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     syncInFlightRef.current = operation;
     return operation;
   }, [performSync]);
-  useEffect(() => {
-    if (!userId || !supabase) return;
-    return NetInfo.addEventListener((network) => {
-      if (
-        shouldAttemptSync(network) &&
-        pendingCount(storeRef.current.snapshot.outbox) > 0
-      )
-        void syncNow().catch(() => undefined);
-    });
-  }, [syncNow, userId]);
-  useEffect(() => {
-    if (!userId) {
-      startupSyncUserRef.current = undefined;
-      return;
-    }
-    if (loading || !supabase || startupSyncUserRef.current === userId) return;
-    startupSyncUserRef.current = userId;
-    if (pendingCount(storeRef.current.snapshot.outbox) > 0)
-      void NetInfo.fetch()
-        .then((network) => {
-          if (shouldAttemptSync(network))
-            return syncNow();
-        })
-        .catch(() => undefined);
-  }, [loading, syncNow, userId]);
+  const hasPendingSyncWork = useCallback(
+    () => pendingCount(storeRef.current.snapshot.outbox) > 0,
+    [],
+  );
+  useAutomaticSync({
+    enabled: Boolean(supabase),
+    loading,
+    userId,
+    hasPendingWork: hasPendingSyncWork,
+    syncNow,
+  });
   const refreshWorkforce = useCallback(async () => {
     if (!selectedProject || !supabase) return;
     const projectId = selectedProject.id;

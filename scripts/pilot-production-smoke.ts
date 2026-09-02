@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { isHealthyPrivacyPage, isHealthyPublicPortal } from "./smoke-health";
 
 const url = process.env.SUPABASE_URL ?? process.env.EXPO_PUBLIC_SUPABASE_URL ?? "";
 const anonKey = process.env.SUPABASE_ANON_KEY ?? process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? "";
@@ -49,9 +50,9 @@ async function createOwner(label: string): Promise<{ id: string; api: SupabaseCl
 async function main(): Promise<void> {
   await cleanupStaleSmokeUsers();
   const portal = await fetch(portalUrl);
-  if (!portal.ok || !(await portal.text()).includes("Materiál na stavbu")) throw new Error("WORKER_PORTAL_UNHEALTHY");
+  if (!portal.ok || !isHealthyPublicPortal(await portal.text())) throw new Error("WORKER_PORTAL_UNHEALTHY");
   const privacy = await fetch(new URL("/privacy.html", portalUrl));
-  if (!privacy.ok || !(await privacy.text()).includes("Ochrana súkromia")) throw new Error("PRIVACY_PAGE_UNHEALTHY");
+  if (!privacy.ok || !isHealthyPrivacyPage(await privacy.text())) throw new Error("PRIVACY_PAGE_UNHEALTHY");
 
   const owner = await createOwner("owner");
   const outsider = await createOwner("outsider");

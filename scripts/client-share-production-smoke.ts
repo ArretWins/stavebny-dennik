@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
@@ -109,6 +109,8 @@ async function main(): Promise<void> {
   );
   const evidenceId = `share-photo-${randomUUID()}`;
   evidencePath = `${ownerId}/${projectId}/site-tasks/${taskId}/${workerUserId}/${evidenceId}.png`;
+  const capturedAt = new Date().toISOString();
+  const contentSha256 = createHash('sha256').update(png).digest('hex');
   const upload = await worker.storage
     .from('attachments')
     .upload(evidencePath, png, { contentType: 'image/png' });
@@ -121,6 +123,10 @@ async function main(): Promise<void> {
         storagePath: evidencePath,
         fileSize: png.byteLength,
         mimeType: 'image/png',
+        captureSource: 'worker_portal',
+        capturedAt,
+        contentSha256,
+        integrityVersion: 'sha256-v1',
       },
     ],
   });

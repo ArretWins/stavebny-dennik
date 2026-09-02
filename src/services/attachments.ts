@@ -7,7 +7,7 @@ import { validateAttachment } from "@/domain/validation";
 import { supabase } from "./supabase";
 import { compressPilotImage } from "./imageCompression";
 import { launchPhotoCamera } from "./cameraLauncher";
-import { readLocalFile } from "./localFile";
+import { readLocalFileArrayBuffer } from "./localFile";
 import {
   bytesToHex,
   exifCoordinates,
@@ -57,7 +57,10 @@ export async function pickPhoto(
   await FileSystem.makeDirectoryAsync(directory, { intermediates: true });
   const localUri = `${directory}/${id}.jpg`;
   await FileSystem.copyAsync({ from: compressed.uri, to: localUri });
-  const storedBytes = await readLocalFile(localUri, "ATTACHMENT_READ_FAILED");
+  const storedBytes = await readLocalFileArrayBuffer(
+    localUri,
+    "ATTACHMENT_READ_FAILED",
+  );
   const contentSha256 = bytesToHex(
     await Crypto.digest(Crypto.CryptoDigestAlgorithm.SHA256, storedBytes),
   );
@@ -98,7 +101,7 @@ export async function uploadPrivateAttachment(
     p_record_id: attachment.id,
   });
   if (quota.error) throw quota.error;
-  const bytes = await readLocalFile(
+  const bytes = await readLocalFileArrayBuffer(
     attachment.localUri,
     "ATTACHMENT_READ_FAILED",
   );

@@ -1,6 +1,6 @@
 import type { Receipt, ReceiptCategory, ReceiptFile } from "@/domain/types";
 import { supabase } from "./supabase";
-import { readLocalFile } from "./localFile";
+import { readLocalFileArrayBuffer } from "./localFile";
 
 function receiptFromRow(row: Record<string, unknown>): Receipt {
   return {
@@ -108,7 +108,7 @@ export async function uploadReceiptFile(
     p_record_id: file.id,
   });
   if (quota.error) throw quota.error;
-  const bytes = await readLocalFile(
+  const bytes = await readLocalFileArrayBuffer(
     file.localUri,
     "RECEIPT_FILE_READ_FAILED",
   );

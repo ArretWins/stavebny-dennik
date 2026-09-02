@@ -2,7 +2,7 @@ import * as FileSystem from "expo-file-system";
 import { base64ToArrayBuffer } from "@/domain/base64";
 
 /** Reads an app-local file without routing file:// URIs through the network stack. */
-export async function readLocalFile(
+export async function readLocalFileArrayBuffer(
   uri: string,
   errorCode = "FILE_READ_FAILED",
 ): Promise<ArrayBuffer> {

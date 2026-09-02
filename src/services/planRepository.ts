@@ -7,7 +7,7 @@ import {
 } from '@/domain/planTasks';
 import type { ProjectPlan, SiteTask, SiteTaskEvent } from '@/domain/types';
 import { supabase } from './supabase';
-import { readLocalFile } from './localFile';
+import { readLocalFileArrayBuffer } from './localFile';
 
 function extensionFor(mimeType: ProjectPlan['mimeType']): string {
   if (mimeType === 'application/pdf') return 'pdf';
@@ -159,7 +159,10 @@ export async function pickProjectPlan(
 
 export async function uploadProjectPlan(plan: ProjectPlan): Promise<ProjectPlan> {
   if (!supabase) throw new Error('SUPABASE_NOT_CONFIGURED');
-  const bytes = await readLocalFile(plan.localUri, 'PLAN_FILE_READ_FAILED');
+  const bytes = await readLocalFileArrayBuffer(
+    plan.localUri,
+    'PLAN_FILE_READ_FAILED',
+  );
   const storagePath = `${plan.ownerId}/${plan.projectId}/${plan.id}.${extensionFor(plan.mimeType)}`;
   const upload = await supabase.storage.from('plans').upload(storagePath, bytes, {
     contentType: plan.mimeType,

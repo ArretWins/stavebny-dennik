@@ -67,11 +67,18 @@ describe("sync center", () => {
 
   it("retries once after startup or network recovery and prevents overlap", () => {
     const app = readFileSync("src/state/app.tsx", "utf8");
+    const automaticSync = readFileSync(
+      "src/state/useAutomaticSync.ts",
+      "utf8",
+    );
     const today = readFileSync("src/screens/TodayScreen.tsx", "utf8");
-    expect(app).toContain("NetInfo.addEventListener");
-    expect(app).toContain("NetInfo.fetch()");
+    expect(app).toContain("useAutomaticSync({");
     expect(app).toContain("syncInFlightRef.current");
-    expect(app).toContain("startupSyncUserRef.current === userId");
+    expect(automaticSync).toContain("NetInfo.addEventListener");
+    expect(automaticSync).toContain("NetInfo.fetch()");
+    expect(automaticSync).toContain(
+      "startupSyncUserRef.current === userId",
+    );
     expect(today).toContain('navigation.navigate("SyncCenter")');
   });
 });
