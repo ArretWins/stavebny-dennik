@@ -91,9 +91,8 @@ export default {
       return proxyPrivatePage(request, upstreamShareUrl);
     if (url.pathname === '/supplier-quote')
       return proxyPrivatePage(request, upstreamSupplierQuoteUrl);
-    if (url.pathname === '/reset-password' || url.pathname === '/reset-password.html') {
-      const assetUrl = new URL('/reset-password.html', url);
-      const response = await env.ASSETS.fetch(new Request(assetUrl, request));
+    if (url.pathname === '/reset-password') {
+      const response = await env.ASSETS.fetch(request);
       const headers = new Headers(response.headers);
       headers.set('Cache-Control', 'private, no-store, max-age=0');
       headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');

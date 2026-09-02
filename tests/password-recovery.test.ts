@@ -28,4 +28,10 @@ describe("password recovery", () => {
     expect(script).toContain("uk: {");
     expect(script).toContain("ru: {");
   });
+
+  it("serves the extensionless recovery page without a redirect loop", () => {
+    const worker = readFileSync("worker-portal/src/_worker.js", "utf8");
+    expect(worker).toContain("url.pathname === '/reset-password'");
+    expect(worker).toContain("const response = await env.ASSETS.fetch(request)");
+  });
 });
